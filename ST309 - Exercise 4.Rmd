@@ -1,0 +1,244 @@
+---
+title: "ST309 - Exercise 4"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1a
+```{r}
+library(tree)
+library(ISLR)
+
+attach(College)
+Elite = factor(ifelse(Top10perc>50,"No","Yes")) #Classifying > 50% as an elite college
+Elite=as.factor(Elite)
+
+College2 = data.frame(College,Elite)
+tree.college = tree(Elite~.-Top10perc, College2)
+
+College2$Elite=as.factor(College2$Elite)
+College2$Private=as.factor(College2$Private)
+
+summary(tree.college)
+
+plot(tree.college)
+text(tree.college, pretty=1, cex=0.6)
+```
+
+## Question 1b
+```{r}
+set.seed(4)
+train = sample(1:nrow(College2), 500)
+
+testData = College2[-train,]
+Elite.test = Elite[-train]
+tree2 = tree(Elite~.-Top10perc, College2, subset=train)
+tree.College2 = predict(tree2, testData, type="class") 
+table(tree.College2, Elite.test)
+
+plot(tree2)
+text(tree2,pretty=1,cex=0.6)
+
+cat("Misclassification rate for testing data: ", (4+5)/(24+4+5+244))
+```
+
+## Question 1c
+```{r}
+logistic.College2 = glm(Elite~Top25perc+S.F.Ratio+Expend+P.Undergrad+perc.alumni+Expend+Room.Board, data=College2, family=binomial)
+summary(logistic.College2)
+
+dim(College2)
+pred.College2 = predict(logistic.College2, type="response")
+pred.College2Elite = rep("No", 777)
+pred.College2Elite[pred.College2 > 0.5] = "Yes"
+table(pred.College2Elite, Elite)
+
+cat("Accuracy rate of data: ", (12+10)/(68+12+10+687))
+
+#Removing S.F ratio from the model
+logistic.College2 = glm(Elite~Top25perc+Expend+P.Undergrad+perc.alumni+Expend+Room.Board, data=College2, family=binomial)
+summary(logistic.College2)
+
+dim(College2)
+pred.College2 = predict(logistic.College2, type="response")
+pred.College2Elite = rep("No", 777)
+pred.College2Elite[pred.College2 > 0.5] = "Yes"
+table(pred.College2Elite, Elite)
+
+cat("Accuracy rate of training data: ", (11+10)/(68+11+10+688))
+```
+The accuracy for the unrefined model is 0.02831403, and the refined model is 0.02702703. This makes a difference in accuracy of 0.001287 which is small.
+
+## Question 2a
+```{r}
+?Auto
+View(Auto)
+summary(Auto)
+
+attach(Auto)
+length(Auto)
+pairs(Auto[,1:8]) #removing names by counting
+```
+
+## Question 2b
+```{r}
+cor(Auto[,1:8])
+```
+
+## Question 2c
+```{r}
+?lm
+auto_mlr = lm(mpg~.-name,Auto)
+summary(auto_mlr)
+```
+
+Part i: There are a couple of predictors that do have a relationship with the response. If we take a threshold of 0.05 for the p-value of coefficients being 0, we can see that a couple of predictors are unlikely to have a 0 coefficient which suggests that they have no relationship with the response.
+
+Part ii: Displacement, weight, origin and year.
+
+Part iii: The year variable has a coefficient of 0.750773. This suggests that mpg goes up by 4 every 3 years. The origin variable has a coefficient of 1.426141  which suggests that mpg increases by 1.43 due to the origin.
+
+Part iv: With insignificant predictors, the best way to deal with them is to remove them as they are unnecessary. For example, in the plot in (a), we can say that acceleration is unnecessary due to the lack of correlation. Therefore, we should remove the acceleration variable as well as other variables that have a strong correlation with acceleration to allow the model to only contain covariates which provide as much independent information as possible. 
+
+## Question 2d
+```{r}
+par(mfrow=c(2,2))
+plot(auto_mlr)
+```
+Yes, there are a couple of problems that are noticeable from the plots. In the residuals vs fitted plot, the data is non-linear and the variance is not constant. We can conclude this from the U-shape pattern the plot shows. 
+
+Regarding the outliers, we can see that most of the data falls in the range [0,2] so there aren't any unusually large outliers.
+
+## Question 2e
+```{r}
+pairs(data.frame(log(Auto$mpg),Auto[,-c(1,9)]))
+
+par(mfrow=c(1,1))
+```
+Comparing the plots in (a) to (e), there isn't much of a difference in the plots. It doesn't suggest that it has improved the modelling mpg.
+
+## Question 3ai
+β0 = 2, β1 = 2, β2 = 1 and ε follows a normal distribution.
+
+## Question 3aii
+```{r}
+set.seed(3)
+x1=runif(150) #150 U(0,1) random numbers
+x2=0.5*runif(150)+rnorm(150)/5 #rnorm(150) returns 150 N(0,1) random numbers
+y=2+2*x1+x2+rnorm(150)
+
+?data.frame
+y_train = y[1:100] 
+x = data.frame(x1, x2)
+x_train = x[1:100,]
+x_test = x[101:150,]
+
+lm1 = lm(y_train~x1+x2, data=x_train)
+summary(lm1)
+
+?confint
+confint(lm1, level=0.95)
+```
+
+## Question 3aiii
+```{r}
+#Using x_test from question 3aii
+y_test = y[101:150]
+
+lm2 = lm(y_test~x1+x2, data=x_test)
+summary(lm2)
+
+?predict
+y_predict = predict(lm2, newdata=x_test, interval='prediction')
+((1/50)*(sum(y_test - y_predict))^2)^(1/2)
+```
+
+## Question 3bi
+```{r}
+set.seed(3)
+x1=runif(150)
+x2=0.5*x1+rnorm(150)/5
+y=2+2*x1+x2+rnorm(150)
+
+cor(x1,x2)
+```
+
+## Question 3bii
+```{r}
+y_train = y[1:100] 
+x = data.frame(x1, x2)
+x_train = x[1:100,]
+x_test = x[101:150,]
+
+lm3 = lm(y_train~x1+x2, data=x_train)
+summary(lm3)
+
+confint(lm3, level=0.95)
+
+y_test = y[101:150]
+lm4 = lm(y_test~x1+x2, data=x_test)
+summary(lm4)
+
+y_predict = predict(lm4, newdata=x_test, interval='prediction')
+((1/50)*(sum(y_test - y_predict))^2)^(1/2)
+```
+
+## Question 3biii
+The rMSPE in (a) is 4.892408e-14 and here, it is 2.609494e-14. In (a), the rMSPE is considerably bigger than in (b). This is probably because in (b), x2 has a relationship with x1 and that relationship is defined by x2=0.5*x1+rnorm(150)/5. Incorporating this relationship in the model makes it more accurate as we have more information about the data. 
+
+## Question 3biv
+```{r}
+lm5 = lm(y_test~x1, data=x_test)
+summary(lm5)
+
+confint(lm5, level=0.95)
+
+y_test = y[101:150]
+lm6 = lm(y_test~x1, data=x_test)
+summary(lm6)
+
+y_predict = predict(lm6, newdata=x_test, interval='prediction')
+((1/50)*(sum(y_test - y_predict))^2)^(1/2)
+```
+Since x2 is not significant, the rMSPE is now 1.202691e-14 which is smaller than 2.609494e-14 when we fit the data with x2. Removing the variable x2 lowers the rMSPE and makes the model be less likely to have errors.
+
+## Question 3ci
+```{r}
+set.seed(3)
+x1=runif(150)
+epsilon=rnorm(150)
+x2=0.5*runif(150)+epsilon/5
+y=2+2*x1+x2+epsilon
+
+cor(x2, epsilon)
+```
+
+## Question 3cii
+```{r}
+y_train = y[1:100] 
+x = data.frame(x1, x2)
+x_train = x[1:100,]
+x_test = x[101:150,]
+
+lm7 = lm(y_train~x1+x2, data=x_train)
+summary(lm7)
+
+confint(lm7, level=0.95)
+
+y_test = y[101:150]
+lm8 = lm(y_test~x1+x2, data=x_test)
+summary(lm8)
+
+y_predict = predict(lm8, newdata=x_test, interval='prediction')
+((1/50)*(sum(y_test - y_predict))^2)^(1/2)
+```
+
+## Question 3ciii
+The rMSPE in (a) is 4.892408e-14, in (b) is 2.609494e-14 and in (c) is 1.912373e-14. From these values, we can see that the root mean squared predictive error is the smallest in (c), followed by (b) then (a).
+
+The rMSPE in (c) is much smaller than (a) and (b) because our model now also depends on epsilon. This model then contains more information as compared to (a) and (b) because of epsilon, therefore, it is more accurate and has less room for error.
