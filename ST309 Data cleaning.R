@@ -1,6 +1,7 @@
 library(readr)
 library(dplyr)
 library(ggplot2)
+library(DataCombine)
 
 crime2019 = read_csv("Crime_Data_from_2010_to_2019.csv")
 dim(crime2019)
@@ -51,7 +52,20 @@ nrow(crime) - sum(is.na(crime$`Crm Cd 4`))
 crime <- select(crime, -`Crm Cd 4`)
 ncol(crime)
 
+#Renaming all the columns
+names(crime) <- c('RecNo','ReportDate','DateOCC','TimeOCC','Area','AreaName','DistrictNo','Part','CrimeCode','CrmDesc','Mocodes','VictAge','VictSex','VictRace','PremiseCd','PremiseDesc','WeaponCd','WeaponDesc','Status','StatusDesc','CrimeCd1','CrimeCd2','CrimeCd3','Location','CrossStreet','Lat','Lon')
+
+#Transforming columns Victim Sex and Victim race
+crime$VictSex <- as.factor(crime$VictSex)
+class(crime$VictSex)
+
+class(crime$VictRace)
+
+?FindReplace
+crime <- FindReplace(data=crime,Var=crime$VictSex,replaceData=Replaces,from=c("M","F","X"),to=c("0","1","2"))
+crime <- FindReplace(data=crime,Var=crime$VictRace,replaceData=Replaces,from=c("A","B","C","D","F","G","H","I","J","K","L","O","P","S","U","V","W","X","Z"),to=c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"))
+
 #Exploratory analysis - can't plot correlation graph
 #Null value problem, enter 0 in null cells
-quantitative <- sapply(crime$DR_NO,table(DR_NO,`TIME OCC`,AREA,`Rpt Dist No`,`Crm Cd`,Mocodes,`Vict Age`,`Premis Cd`,`Weapon Used Cd`,`Crm Cd 1`,`Crm Cd 2`,`Crm Cd 3`))
+quantitative <- select(crime, crime$DR_NO,crime$`TIME OCC`,crime$AREA,crime$`Rpt Dist No`,crime$`Crm Cd`,crime$Mocodes,crime$`Vict Age`,crime$`Premis Cd`,crime$`Crm Cd 1`,crime$`Crm Cd 2`,crime$`Crm Cd 3`)
 pairs(quantitative[,1:10])
