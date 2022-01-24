@@ -16,3 +16,5 @@
 
 ### References
 1. [Decision and classification trees](https://www.datacamp.com/community/tutorials/decision-trees-R)
+2. [Predictive policing](https://www.liberties.eu/en/stories/predictive-policing/43679)
+3. [Crime forecasting](https://vciba.springeropen.com/articles/10.1186/s42492-021-00075-z#:~:text=Crime%20forecasting%20refers%20to%20the,record%20some%20unusual%20illegal%20activity.)
