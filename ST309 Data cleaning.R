@@ -31,31 +31,46 @@ summary(crime$`Crm Cd`)
 crime2019d <- density(crime2019$`Crm Cd`)
 crimed <- density(crime$`Crm Cd`)
 
-library(ggplot2)
-
 par(mfrow=c(1,2))
 plot(crime2019d, main="Density of crime severity for 2010-2019")
 plot(crimed, main="Density of crime severity for 2019-2020")
 
-#Checking for null entries in the whole table
-sum(is.na(crime))
-#Checking for null entries in crime code
-sum(is.na(crime$`Crm Cd`))
-
-#Crime codes 3 and 4 column seems empty
-nrow(crime) - sum(is.na(crime$`Crm Cd 3`))
-
-#Which other columns should be removed?
-#Remove Crm Cd 4 because this column is empty
-nrow(crime) - sum(is.na(crime$`Crm Cd 4`))
-
-crime <- select(crime, -`Crm Cd 4`)
-ncol(crime)
-
 #Renaming all the columns
 names(crime) <- c('RecNo','ReportDate','DateOCC','TimeOCC','Area','AreaName','DistrictNo','Part','CrimeCode','CrmDesc','Mocodes','VictAge','VictSex','VictRace','PremiseCd','PremiseDesc','WeaponCd','WeaponDesc','Status','StatusDesc','CrimeCd1','CrimeCd2','CrimeCd3','Location','CrossStreet','Lat','Lon')
 
-#Transforming columns Victim Sex and Victim race
+attach(crime)
+
+#Checking for null entries in our predictors
+sum(is.na(crime))
+
+sum(is.na(Area))
+sum(is.na(RecNo))
+sum(is.na(CrimeCode))
+sum(is.na(DistrictNo))
+sum(is.na(Mocodes))
+sum(is.na(VictAge))
+sum(is.na(VictSex))
+sum(is.na(VictRace))
+sum(is.na(PremiseCd))
+sum(is.na(WeaponCd))
+#Mocodes, VictSex, VictRace, PremiseCd, WeaponCd have null entries
+
+#Replacing values into empty cells
+
+#Crime codes 3 and 4 column seems empty
+nrow(crime) - sum(is.na(CrimeCd3))
+
+#Remove Crm Cd 4 because this column is empty
+nrow(crime) - sum(is.na(CrimeCd4))
+
+crime <- select(crime, -CrimeCd4)
+ncol(crime)
+
+#Which other columns should be removed?
+
+#Transforming CrimeCode column
+
+#Transforming Victim Sex and Victim race columns 
 crime$VictSex <- as.factor(crime$VictSex)
 class(crime$VictSex)
 
@@ -67,5 +82,7 @@ crime <- FindReplace(data=crime,Var=crime$VictRace,replaceData=Replaces,from=c("
 
 #Exploratory analysis - can't plot correlation graph
 #Null value problem, enter 0 in null cells
-quantitative <- select(crime, crime$DR_NO,crime$`TIME OCC`,crime$AREA,crime$`Rpt Dist No`,crime$`Crm Cd`,crime$Mocodes,crime$`Vict Age`,crime$`Premis Cd`,crime$`Crm Cd 1`,crime$`Crm Cd 2`,crime$`Crm Cd 3`)
-pairs(quantitative[,1:10])
+quantitative <- select(crime, RecNo,TimeOCC,Area,DistrictNo,CrimeCode,Mocodes,VictAge,PremiseCd,CrimeCd1,CrimeCd2,CrimeCd3)
+pairs(quantitative[,1:5])
+
+#Modelling predictors
