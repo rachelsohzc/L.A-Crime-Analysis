@@ -1,0 +1,43 @@
+library(readr)
+library(dplyr)
+library(ggplot2)
+crime = read_csv("Crime_Data_from_2020_to_Present.csv")
+dim(crime)
+library(tidyverse)
+crime$AREA <- as.numeric(crime$AREA)
+class(crime$AREA)
+names(crime) <- c('RecNo','ReportDate','DateOCC','TimeOCC','Area','AreaName','DistrictNo','Part','CrimeCode','CrmDesc','Mocodes','VictAge','VictSex','VictRace','PremiseCd','PremiseDesc','WeaponCd','WeaponDesc','Status','StatusDesc','CrimeCd1','CrimeCd2','CrimeCd3','CrimeCd4','Location','CrossStreet','Lat','Lon')
+attach(crimefinal)
+sum(is.na(crime))
+sum(is.na(Area))
+sum(is.na(RecNo))
+sum(is.na(CrimeCode))
+sum(is.na(DistrictNo))
+sum(is.na(Mocodes))
+sum(is.na(VictAge))
+sum(is.na(VictSex))
+sum(is.na(VictRace))
+sum(is.na(PremiseCd))
+sum(is.na(WeaponCd))
+
+view(crime)
+
+crime2 = subset(crime, select = -c(CrimeCd2,CrimeCd3,CrimeCd4))
+crime2 = subset(crime2, select = -c(CrossStreet,Location,StatusDesc,Status,WeaponDesc,WeaponCd, PremiseDesc,PremiseCd,Mocodes, CrmDesc, Part, AreaName))
+crimefinal = na.omit(crime2)
+Severity = ifelse(CrimeCd1 < 300, 'Severe', 'Non Severe')
+Severity = as.factor(Severity)
+crimefinal2 = data.frame(crimefinal, Severity)
+crimefinal2 = subset(crimefinal2, select = -c(CrimeCode,CrimeCd1))
+library(tree)
+
+sample_crime = sample_n(crimefinal2, 100)
+attach(crime_sample)
+
+
+sample_crime$VictSex = as.numerical(sample_crime$VictSex)
+sample_crime$VictRace = as.numerical(sample_crime$VictRace)
+    
+
+Severity.logistic = glm(Severity~Area + VictSex + VictAge, data = sample_crime, family = binomial)
+summary(Severity.logistic)
