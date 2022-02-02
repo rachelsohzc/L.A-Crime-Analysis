@@ -69,7 +69,7 @@ sum(is.na(crime$VictRace))
 sum(is.na(crime$PremiseCd))
 sum(is.na(crime$WeaponCd))
 
-View(crime)
+dim(crime)
 
 #Removing unknown records in VictSex and VictRace
 crime <- crime[!(crime$VictSex=="X"),]
@@ -80,23 +80,23 @@ dim(crime)
 attach(crime)
 crime = subset(crime, select = -c(CrimeCd2,CrimeCd3,CrimeCd4))
 crime = subset(crime, select = -c(ReportDate,CrossStreet,Location,StatusDesc,Status,WeaponDesc, PremiseDesc,PremiseCd,Mocodes, CrmDesc, Part, AreaName))
-View(crime)
 
-#Transforming columns - VictSex and VictRace columns
-crime$VictSex <- as.factor(crime$VictSex)
-class(crime$VictSex)
+#Transforming columns - CrimeCode
+Severity = ifelse(crime$CrimeCd1 < 300, 'Severe', 'Non-Severe')
+Severity = as.factor(Severity)
+crime <- data.frame(crime, Severity)
 
-class(crime$VictRace)
+#Removing CrimeCode and CrimeCd1 as Severity has replaced it
+crime = subset(crime, select = -c(CrimeCode,CrimeCd1))
 
-?FindReplace
-crime <- FindReplace(data=crime,Var=crime$VictSex,replaceData=Replaces,from=c("M","F","X"),to=c("0","1","2"))
-crime <- FindReplace(data=crime,Var=crime$VictRace,replaceData=Replaces,from=c("A","B","C","D","F","G","H","I","J","K","L","O","P","S","U","V","W","X","Z"),to=c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"))
+#Transforming columns - VictSex and Weapon
+Female <-ifelse(crime$VictSex == "F", 'Yes', 'No')
+Female <- as.factor(Female)
+crime <- data.frame(crime, Female)
 
-#Changing CrimeCode column
+Weapon <-ifelse(crime$WeaponCd == 0, 'No', 'Yes')
+Weapon <- as.factor(Weapon)
+crime <- data.frame(crime, Weapon)
 
-#Exploratory analysis - can't plot correlation graph
-#quantitative <- select(crime, RecNo,TimeOCC,Area,DistrictNo,CrimeCode,Mocodes,VictAge,PremiseCd,CrimeCd1,CrimeCd2,CrimeCd3)
-#pairs(quantitative[,1:5])
-
-#Modelling predictors
+crime = subset(crime, select = -c(VictSex,WeaponCd))
 
