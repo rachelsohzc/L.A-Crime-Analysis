@@ -71,6 +71,11 @@ sum(is.na(crime$WeaponCd))
 
 View(crime)
 
+#Removing unknown records in VictSex and VictRace
+crime <- crime[!(crime$VictSex=="X"),]
+crime <- crime[!(crime$VictRace=="X"),]
+dim(crime)
+
 #Removing columns we do not need
 attach(crime)
 crime = subset(crime, select = -c(CrimeCd2,CrimeCd3,CrimeCd4))
