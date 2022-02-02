@@ -49,6 +49,7 @@ sum(is.na(crime$VictAge))
 sum(is.na(crime$VictSex))
 sum(is.na(crime$VictRace))
 sum(is.na(crime$PremiseCd))
+sum(is.na(crime$PremiseDesc))
 sum(is.na(crime$WeaponCd))
 #Mocodes, VictSex, VictRace, PremiseCd, WeaponCd have null entries
 
@@ -57,6 +58,7 @@ crime <- crime[!is.na(crime$Mocodes),]
 crime <- crime[!is.na(crime$VictAge),]
 crime <- crime[!is.na(crime$VictSex),]
 crime <- crime[!is.na(crime$VictRace),]
+crime <- crime[!is.na(crime$PremiseDesc),]
 crime <- crime[!is.na(crime$PremiseCd),]
 
 #Replacing null values with 0 for WeaponCd to denote no weapon involved
@@ -79,7 +81,7 @@ dim(crime)
 #Removing columns we do not need
 attach(crime)
 crime = subset(crime, select = -c(CrimeCd2,CrimeCd3,CrimeCd4))
-crime = subset(crime, select = -c(ReportDate,CrossStreet,Location,StatusDesc,Status,WeaponDesc, PremiseDesc,PremiseCd,Mocodes, CrmDesc, Part, AreaName))
+crime = subset(crime, select = -c(ReportDate,CrossStreet,Location,StatusDesc,Status,WeaponDesc, Mocodes, CrmDesc, Part, AreaName))
 
 #Transforming columns - CrimeCode
 Severity = ifelse(crime$CrimeCd1 < 300, 'Severe', 'Non-Severe')
@@ -99,4 +101,28 @@ Weapon <- as.factor(Weapon)
 crime <- data.frame(crime, Weapon)
 
 crime = subset(crime, select = -c(VictSex,WeaponCd))
+
+#Splitting premise into 4 categories: Commercial, residential, industrial and outdoors
+premisetable <- table(crime['PremiseDesc'])
+premisetable <- sort(premisetable,decreasing = TRUE)
+premisetable[1:10]
+
+OtherPremise = case_when(crime$PremiseDesc =='SINGLE FAMILY DWELLING'~'No',crime$PremiseDesc =='STREET'~'No',crime$PremiseDesc =='MULTI-UNIT DWELLING (APARTMENT, DUPLEX, ETC)'~'No',crime$PremiseDesc =='PARKING LOT'~'No',crime$PremiseDesc =='SIDEWALK'~'No',crime$PremiseDesc =='VEHICLE, PASSENGER/TRUCK'~'No',crime$PremiseDesc =='OTHER BUSINESS'~'No',crime$PremiseDesc =='GARAGE/CARPORT'~'No',crime$PremiseDesc =='DRIVEWAY'~'No',crime$PremiseDesc =='PARKING UNDERGROUND/BUILDING'~'No')
+SFamDwelling = case_when(crime$PremiseDesc == 'SINGLE FAMILY DWELLING '~'Yes')
+Street = case_when(crime$PremiseDesc == 'STREET '~'Yes')
+MUDwelling = case_when(crime$PremiseDesc == 'MULTI-UNIT DWELLING (APARTMENT, DUPLEX, ETC)'~'Yes')
+Parking = case_when(crime$PremiseDesc == 'PARKING LOT'~'Yes')
+Sidewalk = case_when(crime$PremiseDesc == 'SIDEWALK'~'Yes')
+Vehicle = case_when(crime$PremiseDesc=='VEHICLE, PASSENGER/TRUCK'~'Yes')
+OtherBusiness = case_when(crime$PremiseDesc == 'OTHER BUSINESS'~'Yes')
+Garage = case_when(crime$PremiseDesc == 'GARAGE/CARPORT'~'Yes')
+Driveway = case_when(crime$PremiseDesc == 'DRIVEWAY'~'Yes')
+UnderParking = case_when(crime$PremiseDesc=='PARKING UNDERGROUND/BUILDING'~'Yes')
+
+crime = cbind(crime,SFamDwelling,Street,MUDwelling,Parking,Sidewalk,Vehicle,OtherBusiness,Garage,Driveway,UnderParking,OtherPremise)
+crime$OtherPremise[is.na(crime$OtherPremise)] <- 'Yes'
+crime[is.na(crime)] <- 'No'
+View(crime)
+
+crime <- subset(crime, select = -c(PremiseCd,PremiseDesc))
 
