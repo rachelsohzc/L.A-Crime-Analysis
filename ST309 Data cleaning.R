@@ -107,6 +107,8 @@ premisetable <- table(crime['PremiseDesc'])
 premisetable <- sort(premisetable,decreasing = TRUE)
 premisetable[1:10]
 
+cat('Percentage of top 10 premises:',sum(premisetable[1:10])/nrow(crime)*100,'%')
+
 OtherPremise = case_when(crime$PremiseDesc =='SINGLE FAMILY DWELLING'~'No',crime$PremiseDesc =='STREET'~'No',crime$PremiseDesc =='MULTI-UNIT DWELLING (APARTMENT, DUPLEX, ETC)'~'No',crime$PremiseDesc =='PARKING LOT'~'No',crime$PremiseDesc =='SIDEWALK'~'No',crime$PremiseDesc =='VEHICLE, PASSENGER/TRUCK'~'No',crime$PremiseDesc =='OTHER BUSINESS'~'No',crime$PremiseDesc =='GARAGE/CARPORT'~'No',crime$PremiseDesc =='DRIVEWAY'~'No',crime$PremiseDesc =='PARKING UNDERGROUND/BUILDING'~'No')
 SFamDwelling = case_when(crime$PremiseDesc == 'SINGLE FAMILY DWELLING'~'Yes')
 Street = case_when(crime$PremiseDesc == 'STREET'~'Yes')
@@ -122,7 +124,27 @@ UnderParking = case_when(crime$PremiseDesc=='PARKING UNDERGROUND/BUILDING'~'Yes'
 crime = cbind(crime,SFamDwelling,Street,MUDwelling,Parking,Sidewalk,Vehicle,OtherBusiness,Garage,Driveway,UnderParking,OtherPremise)
 crime$OtherPremise[is.na(crime$OtherPremise)] <- 'Yes'
 crime[is.na(crime)] <- 'No'
-View(crime)
 
 crime <- subset(crime, select = -c(PremiseCd,PremiseDesc))
+
+#Splitting race by groups
+Asian = case_when(crime$VictRace == 'A' ~ 'Yes', crime$VictRace == 'C' ~ 'Yes', crime$VictRace == 'D' ~ 'Yes', crime$VictRace == 'F' ~ 'Yes', crime$VictRace == 'J' ~ 'Yes', crime$VictRace == 'K' ~ 'Yes', crime$VictRace == 'L' ~ 'Yes', crime$VictRace == 'V' ~ 'Yes', crime$VictRace == 'Z' ~ 'Yes', TRUE ~ 'No')
+table(Asian)
+Black = ifelse(crime$VictRace == 'B', 'Yes', 'No')
+Hispanic = ifelse(crime$VictRace == 'H', 'Yes', 'No')
+White = ifelse(crime$VictRace == 'W', 'Yes', 'No')
+OtherRace = case_when(crime$VictRace == 'O' ~ 'Yes', crime$VictRace == 'G' ~ 'Yes', crime$VictRace == 'I' ~ 'Yes', crime$VictRace == 'P' ~ 'Yes', crime$VictRace == 'S' ~ 'Yes', crime$VictRace == 'U' ~ 'Yes', TRUE ~ 'No')
+crime = cbind(crime,Asian,Black,Hispanic,White,OtherRace)
+
+#Splitting time into 4 groups  
+Morning = ifelse(crime$TimeOCC <= 1159 & crime$TimeOCC >= 600, 'Yes', 'No')
+Day = ifelse(crime$TimeOCC <= 1759 & crime$TimeOCC >= 1200, 'Yes', 'No')
+Evening = ifelse(crime$TimeOCC <= 2359 & crime$TimeOCC >= 1800, 'Yes', 'No')
+Night = ifelse(crime$TimeOCC <= 559 & crime$TimeOCC >= 0000, 'Yes', 'No')
+crime = cbind(crime, Morning, Day, Evening, Night)
+
+crime <- subset(crime, select = -c(VictRace,TimeOCC))
+
+View(crime)
+
 
