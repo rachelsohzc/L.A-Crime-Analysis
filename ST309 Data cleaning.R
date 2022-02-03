@@ -147,4 +147,19 @@ crime <- subset(crime, select = -c(VictRace,TimeOCC))
 
 View(crime)
 
+cat('Percentage of severe crimes:',sum(crime$Severity=="Severe")/nrow(crime)*100,'%')
+
+#Modelling
+set.seed(1)
+
+#Resampling the dataset
+nonsevere = crime[!(crime$Severity=="Severe"),]
+severe = crime[!(crime$Severity=="Non-Severe"),]   
+
+nonsevere <- nonsevere[sample(nrow(nonsevere), 5000), ]
+severe <- severe[sample(nrow(severe),5000),]
+
+newcrime <- rbind(severe, nonsevere)
+View(newcrime)
+
 
