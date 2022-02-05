@@ -147,6 +147,14 @@ crime = cbind(crime, Morning, Day, Evening, Night)
 
 crime <- subset(crime, select = -c(VictRace,TimeOCC))
 
+Valley = case_when(crime$Area == 9 ~ 'Yes', crime$Area == 10 ~ 'Yes', crime$Area == 15 ~ 'Yes', crime$Area == 16 ~ 'Yes', crime$Area == 17 ~ 'Yes', crime$Area == 19 ~ 'Yes', crime$Area == 21 ~ 'Yes', TRUE ~ 'No')
+West = case_when(crime$Area == 6 ~ 'Yes', crime$Area == 7 ~ 'Yes', crime$Area == 8 ~ 'Yes', crime$Area == 14 ~ 'Yes', crime$Area == 20 ~ 'Yes', TRUE ~ 'No')
+Central = case_when(crime$Area == 1 ~ 'Yes', crime$Area == 2 ~ 'Yes', crime$Area == 4 ~ 'Yes', crime$Area == 11 ~ 'Yes', crime$Area == 13 ~ 'Yes', TRUE ~ 'No')
+South = case_when(crime$Area == 3 ~ 'Yes', crime$Area == 5 ~ 'Yes', crime$Area == 12 ~ 'Yes', crime$Area == 18 ~ 'Yes', TRUE ~ 'No')
+crime = cbind(crime, Valley, West, South, Central)
+
+crime <- subset(crime, select = -c(Area))
+
 View(crime)
 
 cat('Percentage of severe crimes:',sum(crime$Severity=="Severe")/nrow(crime)*100,'%')
