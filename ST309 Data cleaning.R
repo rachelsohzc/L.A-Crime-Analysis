@@ -149,10 +149,16 @@ View(crime)
 
 cat('Percentage of severe crimes:',sum(crime$Severity=="Severe")/nrow(crime)*100,'%')
 
-#Modelling
-set.seed(1)
+#Decision tree modelling
+library(tree)
+set.seed(2)
 
-#Resampling the dataset
+#Testing the tree
+
+cat('Percentage of severe crimes:',sum(crime$Severity=="Severe")/nrow(crime)*100,'%')
+
+#Cutting down the dataset because the above results were unsatisfactory
+#Resampling the dataset to 10,000 samples only (5000 severe crimes, 5000 non-severe crimes)
 nonsevere = crime[!(crime$Severity=="Severe"),]
 severe = crime[!(crime$Severity=="Non-Severe"),]   
 
@@ -161,5 +167,18 @@ severe <- severe[sample(nrow(severe),5000),]
 
 newcrime <- rbind(severe, nonsevere)
 View(newcrime)
+
+tree1 = tree(Severity2 ~., data = newcrime)
+summary(tree1)
+plot(tree1)
+text(tree1, pretty = 0)
+
+#Logistic regression modelling
+#Altering Yes/No variables for the model
+newcrime$Weapon <- as.character(newcrime$Weapon)
+newcrime$Female <- as.character(newcrime$Female)
+
+newcrime[newcrime=="Yes"] <- 1
+newcrime[newcrime=="No"] <- 0
 
 
