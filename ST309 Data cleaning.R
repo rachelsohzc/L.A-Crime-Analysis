@@ -183,6 +183,11 @@ newcrime$Female <- as.character(newcrime$Female)
 newcrime[newcrime=="Yes"] <- 1
 newcrime[newcrime=="No"] <- 0
 
+#newcrime$Severity <- as.character(newcrime$Severity)
+#newcrime[newcrime=="Severe"] <- 1
+#newcrime[newcrime=="Non-Severe"] <- 0
+#newcrime$Severity <- as.factor(newcrime$Severity)
+
 convertcols <- c("RecNo", "DateOCC", "DistrictNo", "Female", "Weapon", "SFamDwelling", "Street","MUDwelling", "Parking", "Sidewalk", "Vehicle", "OtherBusiness", "Garage", "Driveway", "UnderParking", "OtherPremise", "Asian", "Black", "Hispanic", "White", "OtherRace", "Morning", "Day", "Evening", "Night")
 newcrime[convertcols] <- lapply(newcrime[convertcols],factor)
 sapply(newcrime, class)
