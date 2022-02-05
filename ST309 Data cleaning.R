@@ -136,6 +136,8 @@ White = ifelse(crime$VictRace == 'W', 'Yes', 'No')
 OtherRace = case_when(crime$VictRace == 'O' ~ 'Yes', crime$VictRace == 'G' ~ 'Yes', crime$VictRace == 'I' ~ 'Yes', crime$VictRace == 'P' ~ 'Yes', crime$VictRace == 'S' ~ 'Yes', crime$VictRace == 'U' ~ 'Yes', TRUE ~ 'No')
 crime = cbind(crime,Asian,Black,Hispanic,White,OtherRace)
 
+crime$TimeOCC = as.numeric(crime$TimeOCC)
+
 #Splitting time into 4 groups  
 Morning = ifelse(crime$TimeOCC <= 1159 & crime$TimeOCC >= 600, 'Yes', 'No')
 Day = ifelse(crime$TimeOCC <= 1759 & crime$TimeOCC >= 1200, 'Yes', 'No')
