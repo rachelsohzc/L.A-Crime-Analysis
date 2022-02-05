@@ -174,11 +174,21 @@ plot(tree1)
 text(tree1, pretty = 0)
 
 #Logistic regression modelling
+library(GGally)
+
 #Altering Yes/No variables for the model
 newcrime$Weapon <- as.character(newcrime$Weapon)
 newcrime$Female <- as.character(newcrime$Female)
 
 newcrime[newcrime=="Yes"] <- 1
 newcrime[newcrime=="No"] <- 0
+
+convertcols <- c("RecNo", "DateOCC", "DistrictNo", "Female", "Weapon", "SFamDwelling", "Street","MUDwelling", "Parking", "Sidewalk", "Vehicle", "OtherBusiness", "Garage", "Driveway", "UnderParking", "OtherPremise", "Asian", "Black", "Hispanic", "White", "OtherRace", "Morning", "Day", "Evening", "Night")
+newcrime[convertcols] <- lapply(newcrime[convertcols],factor)
+sapply(newcrime, class)
+
+#Modelling
+summary(newcrime)
+ggpairs(newcrime[,5:30])
 
 
