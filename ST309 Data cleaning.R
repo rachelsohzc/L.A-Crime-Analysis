@@ -196,4 +196,6 @@ sapply(newcrime, class)
 summary(newcrime)
 ggpairs(newcrime[,5:30])
 
+names(newcrime)
+logistic.newcrime=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling,Parking,Sidewalk,Vehicle,OtherBusiness,Garage,Driveway,UnderParking,OtherPremise,Asian,Black,Hispanic,White,OtherRace, Morning, Day, Evening, Night, data=newcrime,family=binomial)
 
