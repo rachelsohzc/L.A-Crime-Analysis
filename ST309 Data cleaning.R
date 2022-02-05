@@ -153,11 +153,16 @@ Central = case_when(crime$Area == 1 ~ 'Yes', crime$Area == 2 ~ 'Yes', crime$Area
 South = case_when(crime$Area == 3 ~ 'Yes', crime$Area == 5 ~ 'Yes', crime$Area == 12 ~ 'Yes', crime$Area == 18 ~ 'Yes', TRUE ~ 'No')
 crime = cbind(crime, Valley, West, South, Central)
 
-crime <- subset(crime, select = -c(Area))
+#Splitting area into 4 boroughs: Valley, West, Central and South
+Valley = case_when(crime$Area == 9 ~ 'Yes', crime$Area == 10 ~ 'Yes', crime$Area == 15 ~ 'Yes', crime$Area == 16 ~ 'Yes', crime$Area == 17 ~ 'Yes', crime$Area == 19 ~ 'Yes', crime$Area == 21 ~ 'Yes', TRUE ~ 'No')
+West = case_when(crime$Area == 6 ~ 'Yes', crime$Area == 7 ~ 'Yes', crime$Area == 8 ~ 'Yes', crime$Area == 14 ~ 'Yes', crime$Area == 20 ~ 'Yes', TRUE ~ 'No')
+Central = case_when(crime$Area == 1 ~ 'Yes', crime$Area == 2 ~ 'Yes', crime$Area == 4 ~ 'Yes', crime$Area == 11 ~ 'Yes', crime$Area == 13 ~ 'Yes', TRUE ~ 'No')
+South = case_when(crime$Area == 3 ~ 'Yes', crime$Area == 5 ~ 'Yes', crime$Area == 12 ~ 'Yes', crime$Area == 18 ~ 'Yes', TRUE ~ 'No')
+crime = cbind(crime, Valley, West, South, Central)
+
+crime <- subset(crime, select = -c(VictRace,TimeOCC,Area))
 
 View(crime)
-
-cat('Percentage of severe crimes:',sum(crime$Severity=="Severe")/nrow(crime)*100,'%')
 
 #Decision tree modelling
 library(tree)
@@ -206,6 +211,45 @@ sapply(newcrime, class)
 summary(newcrime)
 ggpairs(newcrime[,5:30])
 
+#Take all columns except DateOCC and Severity to convert into numeric
+#Auto code
+grep("DateOCC", colnames(newcrime))
+grep("Severity", colnames(newcrime))
+
+numconvert <- newcrime[,-c(2,8)]
+
+for (i in 1:ncol(newcrime[,numconvert])){
+  newcrime[,numconvert][,i] <- as.numeric(as.character(newcrime[,numconvert][,i]))
+}
+
+#Manual code
+newcrime$SFamDwelling = as.numeric(newcrime$SFamDwelling) - 1
+newcrime$Street = as.numeric(newcrime$Street) - 1
+newcrime$MUDwelling = as.numeric(newcrime$MUDwelling) - 1
+newcrime$Parking = as.numeric(newcrime$Parking) - 1
+newcrime$Sidewalk = as.numeric(newcrime$Sidewalk) - 1
+newcrime$Vehicle = as.numeric(newcrime$Vehicle) - 1
+newcrime$OtherBusiness = as.numeric(newcrime$OtherBusiness) - 1
+newcrime$Garage = as.numeric(newcrime$Garage) - 1
+newcrime$Driveway = as.numeric(newcrime$Driveway) - 1
+newcrime$UnderParking = as.numeric(newcrime$UnderParking) - 1
+newcrime$OtherPremise = as.numeric(newcrime$OtherPremise) - 1
+newcrime$Asian = as.numeric(newcrime$Asian) - 1
+newcrime$Black = as.numeric(newcrime$Black) - 1
+newcrime$Hispanic = as.numeric(newcrime$Hispanic) - 1
+newcrime$White = as.numeric(newcrime$White) - 1
+newcrime$OtherRace = as.numeric(newcrime$OtherRace) - 1
+newcrime$Morning = as.numeric(newcrime$Morning) - 1
+newcrime$Day = as.numeric(newcrime$Day) - 1
+newcrime$Evening = as.numeric(newcrime$Evening) - 1
+newcrime$Night = as.numeric(newcrime$Night) - 1
+newcrime$Valley = as.numeric(newcrime$Valley) - 1
+newcrime$West = as.numeric(newcrime$West) - 1
+newcrime$South = as.numeric(newcrime$South) - 1
+newcrime$Central = as.numeric(newcrime$Central) - 1
+
+#Modelling
 names(newcrime)
-logistic.newcrime=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling,Parking,Sidewalk,Vehicle,OtherBusiness,Garage,Driveway,UnderParking,OtherPremise,Asian,Black,Hispanic,White,OtherRace, Morning, Day, Evening, Night, data=newcrime,family=binomial)
+logistic.newcrime=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+OtherPremise+Asian+Black+Hispanic+White+OtherRace+Morning+Day+Evening+Night, data=newcrime,family=binomial)
+summary(logistic.newcrime)
 
