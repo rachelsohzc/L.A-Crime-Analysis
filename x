@@ -58,3 +58,42 @@ test = tree(Severity2 ~., data = newcrime)
 summary(test)
 plot(test)
 text(test, pretty = 0)
+
+newcrime$Weapon <- as.numeric(newcrime$Weapon)
+newcrime$Weapon = newcrime$Weapon - 1
+newcrime$Female <- as.numeric(newcrime$Female)
+newcrime$Female = newcrime$Female - 1
+
+newcrime[newcrime=="Yes"] <- 1
+newcrime[newcrime=="No"] <- 0
+
+convertcols <- c("SFamDwelling","Street","MUDwelling", "Parking", "Sidewalk", "Vehicle", "OtherBusiness", "Garage", "Driveway", "UnderParking", "OtherPremise", "Asian", "Black", "Hispanic", "White", "OtherRace", "Morning", "Day", "Evening", "Night","Valley","West","South","Central")
+newcrime[convertcols] <- lapply(newcrime[convertcols],factor)
+
+newcrime$SFamDwelling = as.numeric(newcrime$SFamDwelling) - 1
+newcrime$Street = as.numeric(newcrime$Street) - 1
+newcrime$MUDwelling = as.numeric(newcrime$MUDwelling) - 1
+newcrime$Parking = as.numeric(newcrime$Parking) - 1
+newcrime$Sidewalk = as.numeric(newcrime$Sidewalk) - 1
+newcrime$Vehicle = as.numeric(newcrime$Vehicle) - 1
+newcrime$OtherBusiness = as.numeric(newcrime$OtherBusiness) - 1
+newcrime$Garage = as.numeric(newcrime$Garage) - 1
+newcrime$Driveway = as.numeric(newcrime$Driveway) - 1
+newcrime$UnderParking = as.numeric(newcrime$UnderParking) - 1
+newcrime$OtherPremise = as.numeric(newcrime$OtherPremise) - 1
+newcrime$Asian = as.numeric(newcrime$Asian) - 1
+newcrime$Black = as.numeric(newcrime$Black) - 1
+newcrime$Hispanic = as.numeric(newcrime$Hispanic) - 1
+newcrime$White = as.numeric(newcrime$White) - 1
+newcrime$OtherRace = as.numeric(newcrime$OtherRace) - 1
+newcrime$Morning = as.numeric(newcrime$Morning) - 1
+newcrime$Day = as.numeric(newcrime$Day) - 1
+newcrime$Evening = as.numeric(newcrime$Evening) - 1
+newcrime$Night = as.numeric(newcrime$Night) - 1
+newcrime$Valley = as.numeric(newcrime$Valley) - 1
+newcrime$West = as.numeric(newcrime$West) - 1
+newcrime$South = as.numeric(newcrime$South) - 1
+newcrime$Central = as.numeric(newcrime$Central) - 1
+
+logistic.newcrime=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Asian+Black+Hispanic+White+Morning+Day+Night+West+South+Central, data=newcrime,family=binomial)
+summary(logistic.newcrime)
