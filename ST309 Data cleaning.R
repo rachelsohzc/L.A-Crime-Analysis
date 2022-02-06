@@ -168,7 +168,6 @@ View(crime)
 library(tree)
 set.seed(1)
 
-attach(crime)
 convertcols <- c("Female", "Weapon", "SFamDwelling", "Street","MUDwelling", "Parking", "Sidewalk", "Vehicle", "OtherBusiness", "Garage", "Driveway", "UnderParking", "OtherPremise", "Asian", "Black", "Hispanic", "White", "OtherRace", "Morning", "Day", "Evening", "Night","Valley","West","South","Central")
 crime[convertcols] <- lapply(crime[convertcols],factor)
 sapply(crime, class)
@@ -217,26 +216,26 @@ text(tree2, pretty = 0)
 #Testing performance of tree1
 train1 = sample(1:nrow(newcrime1), 5000)
 
-testData1 = newcrime1[-train,]
-Severity.test = Severity[-train]
+testData1 = newcrime1[-train1,]
+Severity.test = Severity[-train1]
 
-tree1 = tree(Severity~.-Severity,newcrime1,subset=train)
+tree1 = tree(Severity~.-Severity,newcrime1,subset=train1)
 tree1.pred = predict(tree1, testData1, type="class")
 table(tree1.pred, Severity.test)
 
-cat("The misclassification rate for the testing data is",(24+892)/5000)
+cat("The misclassification rate for the testing data is",(25+879)/5000)
 
 #Testing performance of tree2
 train2 = sample(1:nrow(newcrime3), 5000)
 
-testData2 = newcrime3[-train,]
-Severity.test = Severity[-train]
+testData2 = newcrime3[-train2,]
+Severity.test = Severity[-train2]
 
-tree2 = tree(Severity~.-Severity,newcrime3,subset=train)
+tree2 = tree(Severity~.-Severity,newcrime3,subset=train2)
 tree2.pred = predict(tree2, testData2, type="class")
 table(tree2.pred, Severity.test)
 
-cat("The misclassification rate for the testing data is",(1314+507)/5000)
+cat("The misclassification rate for the testing data is",(1347+513)/5000)
 
 #Cross validation
 #Applying to tree1
