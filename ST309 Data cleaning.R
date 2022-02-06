@@ -166,11 +166,22 @@ View(crime)
 
 #Decision tree modelling
 library(tree)
-set.seed(2)
+set.seed(1)
+
+attach(crime)
+convertcols <- c("Female", "Weapon", "SFamDwelling", "Street","MUDwelling", "Parking", "Sidewalk", "Vehicle", "OtherBusiness", "Garage", "Driveway", "UnderParking", "OtherPremise", "Asian", "Black", "Hispanic", "White", "OtherRace", "Morning", "Day", "Evening", "Night","Valley","West","South","Central")
+crime[convertcols] <- lapply(crime[convertcols],factor)
+sapply(crime, class)
 
 #Testing the tree
+tree1 = tree(Severity ~., data = crime)
+summary(tree1)
+plot(tree1)
+text(tree1, pretty = 0)
 
 cat('Percentage of severe crimes:',sum(crime$Severity=="Severe")/nrow(crime)*100,'%')
+
+detach(crime)
 
 #Cutting down the dataset because the above results were unsatisfactory
 #Resampling the dataset to 10,000 samples only (5000 severe crimes, 5000 non-severe crimes)
@@ -183,10 +194,72 @@ severe <- severe[sample(nrow(severe),5000),]
 newcrime <- rbind(severe, nonsevere)
 View(newcrime)
 
-tree1 = tree(Severity2 ~., data = newcrime)
+#New trees
+attach(newcrime)
+Severity = ifelse(newcrime$Severity=="Severe","Yes","No")
+newcrime1 = data.frame(newcrime, Severity)
+
+tree1 = tree(formula = Severity~., data = newcrime1)
 summary(tree1)
 plot(tree1)
 text(tree1, pretty = 0)
+
+#Tree without weapons
+newcrime2 = newcrime[,-4]
+Severity = ifelse(newcrime2$Severity=="Severe","Yes","No")
+newcrime3 = data.frame(newcrime2, Severity)
+
+tree2 = tree(formula = Severity ~.-Severity, data = newcrime3)
+summary(tree2)
+plot(tree2)
+text(tree2, pretty = 0)
+
+#Testing performance of tree1
+train1 = sample(1:nrow(newcrime1), 5000)
+
+testData1 = newcrime1[-train,]
+Severity.test = Severity[-train]
+
+tree1 = tree(Severity~.-Severity,newcrime1,subset=train)
+tree1.pred = predict(tree1, testData1, type="class")
+table(tree1.pred, Severity.test)
+
+cat("The misclassification rate for the testing data is",(24+892)/5000)
+
+#Testing performance of tree2
+train2 = sample(1:nrow(newcrime3), 5000)
+
+testData2 = newcrime3[-train,]
+Severity.test = Severity[-train]
+
+tree2 = tree(Severity~.-Severity,newcrime3,subset=train)
+tree2.pred = predict(tree2, testData2, type="class")
+table(tree2.pred, Severity.test)
+
+cat("The misclassification rate for the testing data is",(1314+507)/5000)
+
+#Cross validation
+#Applying to tree1
+cv.newcrime1 = cv.tree(tree1, FUN=prune.misclass)
+
+#Picking 2 nodes because our original already has 4 nodes
+cv.newcrime1$size
+cv.newcrime1$dev
+
+prune.newcrime1 = prune.misclass(tree1,best=2)
+plot(prune.newcrime1)
+text(prune.newcrime1, pretty=0)
+
+#Applying to tree2
+cv.newcrime2 = cv.tree(tree2, FUN=prune.misclass)
+
+#Picking 3 nodes
+cv.newcrime2$size
+cv.newcrime2$dev
+
+prune.newcrime2 = prune.misclass(tree2,best=3)
+plot(prune.newcrime2)
+text(prune.newcrime2, pretty=0)
 
 #Logistic regression modelling
 library(GGally)
