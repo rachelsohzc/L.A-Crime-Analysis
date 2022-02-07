@@ -209,18 +209,6 @@ summary(tree2)
 plot(tree2)
 text(tree2, pretty = 0)
 
-#Testing performance of tree1
-crime.treePredict1=predict(tree1, newdata = testdatafinal, type="class")
-table(crime.treePredict1, testdatafinal$Severity)
-
-cat("The misclassification rate for the testing data is",(252+60149)/(115183+252+60149+27633))
-
-#Testing performance of tree2
-crime.treePredict2=predict(tree2, newdata = testdatafinal, type="class")
-table(crime.treePredict2, testdatafinal$Severity)
-
-cat("The misclassification rate for the testing data is",(10345+63950)/(111382+10345+63950+17530))
-
 #Cross validation
 #Applying to tree1
 cv.crime1 = cv.tree(tree1, FUN=prune.misclass)
@@ -236,13 +224,25 @@ text(prune.crime1, pretty=0)
 #Applying to tree2
 cv.crime2 = cv.tree(tree2, FUN=prune.misclass)
 
-#Picking 3 nodes
+#Picking 4 nodes
 cv.crime2$size
 cv.crime2$dev
 
-prune.crime2 = prune.misclass(tree2,best=3)
+prune.crime2 = prune.misclass(tree2,best=4)
 plot(prune.crime2)
 text(prune.crime2, pretty=0)
+
+#Testing performance of tree1
+crime.treePredict1=predict(prune.crime1, newdata = testdatafinal, type="class")
+table(crime.treePredict1, testdatafinal$Severity)
+
+cat("The misclassification rate for the testing data is",(252+60149)/(115183+252+60149+27633))
+
+#Testing performance of tree2
+crime.treePredict2=predict(prune.crime2, newdata = testdatafinal, type="class")
+table(tree.Predict2, testdatafinal$Severity)
+
+cat("The misclassification rate for the testing data is",(10345+63950)/(111382+10345+63950+17530))
 
 #Logistic regression modelling
 library(GGally)
