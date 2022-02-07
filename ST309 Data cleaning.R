@@ -309,3 +309,24 @@ names(newcrime)
 logistic.newcrime=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+OtherPremise+Asian+Black+Hispanic+White+OtherRace+Morning+Day+Evening+Night, data=newcrime,family=binomial)
 summary(logistic.newcrime)
 
+#ROC Curves for all models
+#Tree model 1
+pred.tree1 = predict(tree1, testdatafinal, type="vector")
+prediction.tree1 = prediction(pred.tree1[,2], testdatafinal$Severity)
+rocTree1=performance(prediction.tree1, measure = "tpr", x.measure = "fpr")
+
+plot(rocTree1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 1")
+abline(0,1)
+
+performance(prediction.tree1, measure = "auc")@y.values
+
+#Tree model 2
+pred.tree2 = predict(tree2, testdatafinal, type="vector")
+prediction.tree2 = prediction(pred.tree2[,2], testdatafinal$Severity)
+rocTree2=performance(prediction.tree2, measure = "tpr", x.measure = "fpr")
+
+plot(rocTree2, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 2")
+abline(0,1)
+
+performance(prediction.tree2, measure = "auc")@y.values
+
