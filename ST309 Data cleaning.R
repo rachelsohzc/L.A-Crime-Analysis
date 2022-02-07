@@ -213,13 +213,13 @@ text(tree2, pretty = 0)
 crime.treePredict1=predict(tree1, newdata = testdatafinal, type="class")
 table(crime.treePredict1, testdatafinal$Severity)
 
-cat("The misclassification rate for the testing data is",(244+60144)/(115188+244+60144+27631))
+cat("The misclassification rate for the testing data is",(252+60149)/(115183+252+60149+27633))
 
 #Testing performance of tree2
 crime.treePredict2=predict(tree2, newdata = testdatafinal, type="class")
 table(crime.treePredict2, testdatafinal$Severity)
 
-cat("The misclassification rate for the testing data is",(14890+37197)/(138135+14890+37197+12985))
+cat("The misclassification rate for the testing data is",(10345+63950)/(111382+10345+63950+17530))
 
 #Cross validation
 #Applying to tree1
