@@ -223,26 +223,26 @@ cat("The misclassification rate for the testing data is",(14890+37197)/(138135+1
 
 #Cross validation
 #Applying to tree1
-cv.newcrime1 = cv.tree(tree1, FUN=prune.misclass)
+cv.crime1 = cv.tree(tree1, FUN=prune.misclass)
 
 #Picking 2 nodes because our original already has 4 nodes
-cv.newcrime1$size
-cv.newcrime1$dev
+cv.crime1$size
+cv.crime1$dev
 
-prune.newcrime1 = prune.misclass(tree1,best=2)
-plot(prune.newcrime1)
-text(prune.newcrime1, pretty=0)
+prune.crime1 = prune.misclass(tree1,best=2)
+plot(prune.crime1)
+text(prune.crime1, pretty=0)
 
 #Applying to tree2
-cv.newcrime2 = cv.tree(tree2, FUN=prune.misclass)
+cv.crime2 = cv.tree(tree2, FUN=prune.misclass)
 
 #Picking 3 nodes
-cv.newcrime2$size
-cv.newcrime2$dev
+cv.crime2$size
+cv.crime2$dev
 
-prune.newcrime2 = prune.misclass(tree2,best=3)
-plot(prune.newcrime2)
-text(prune.newcrime2, pretty=0)
+prune.crime2 = prune.misclass(tree2,best=3)
+plot(prune.crime2)
+text(prune.crime2, pretty=0)
 
 #Logistic regression modelling
 library(GGally)
