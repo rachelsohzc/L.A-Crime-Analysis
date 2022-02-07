@@ -187,6 +187,15 @@ detach(crime)
 nonsevere = crime[!(crime$Severity=="Severe"),]
 severe = crime[!(crime$Severity=="Non-Severe"),]   
 
+train = sample(1:nrow(severe),5000)
+trainnotsevere = sample(1:nrow(nonsevere),5000)
+testdatasev = severe[-train,]
+traindatasev = severe[train,]
+testdatanotsev = nonsevere[-trainnotsevere,]
+traindatanonsev = nonsevere[trainnotsevere,]
+traindatafinal = rbind(traindatasev,traindatanonsev)
+testdatafinal = rbind(testdatasev, testdatanotsev)
+
 nonsevere <- nonsevere[sample(nrow(nonsevere), 5000), ]
 severe <- severe[sample(nrow(severe),5000),]
 
