@@ -81,7 +81,7 @@ dim(crime)
 #Removing columns we do not need
 attach(crime)
 crime = subset(crime, select = -c(CrimeCd2,CrimeCd3,CrimeCd4))
-crime = subset(crime, select = -c(ReportDate,CrossStreet,Location,StatusDesc,Status,WeaponDesc, Mocodes, CrmDesc, Part, AreaName))
+crime = subset(crime, select = -c(Lat, Lon, RecNo,DateOCC,DistrictNo,ReportDate,CrossStreet,Location,StatusDesc,Status,WeaponDesc, Mocodes, CrmDesc, Part, AreaName))
 
 #Transforming columns - CrimeCode
 Severity = ifelse(crime$CrimeCd1 < 300, 'Severe', 'Non-Severe')
