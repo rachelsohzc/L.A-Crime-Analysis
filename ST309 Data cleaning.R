@@ -184,6 +184,7 @@ detach(crime)
 
 #Cutting down the dataset because the above results were unsatisfactory
 #Resampling the dataset to 10,000 samples only (5000 severe crimes, 5000 non-severe crimes)
+#This will be our training data
 nonsevere = crime[!(crime$Severity=="Severe"),]
 severe = crime[!(crime$Severity=="Non-Severe"),]   
 
@@ -196,55 +197,29 @@ traindatanonsev = nonsevere[trainnotsevere,]
 traindatafinal = rbind(traindatasev,traindatanonsev)
 testdatafinal = rbind(testdatasev, testdatanotsev)
 
-nonsevere <- nonsevere[sample(nrow(nonsevere), 5000), ]
-severe <- severe[sample(nrow(severe),5000),]
-
-newcrime <- rbind(severe, nonsevere)
-View(newcrime)
-
 #New trees
-attach(newcrime)
-Severity = ifelse(newcrime$Severity=="Severe","Yes","No")
-newcrime1 = data.frame(newcrime, Severity)
-
-tree1 = tree(formula = Severity~., data = newcrime1)
+tree1 = tree(formula = Severity~., data = traindatafinal)
 summary(tree1)
 plot(tree1)
 text(tree1, pretty = 0)
 
 #Tree without weapons
-newcrime2 = newcrime[,-4]
-Severity = ifelse(newcrime2$Severity=="Severe","Yes","No")
-newcrime3 = data.frame(newcrime2, Severity)
-
-tree2 = tree(formula = Severity ~.-Severity, data = newcrime3)
+tree2 = tree(formula = Severity ~.-Weapon, data = traindatafinal)
 summary(tree2)
 plot(tree2)
 text(tree2, pretty = 0)
 
 #Testing performance of tree1
-train1 = sample(1:nrow(newcrime1), 5000)
+crime.treePredict1=predict(tree1, newdata = testdatafinal, type="class")
+table(crime.treePredict1, testdatafinal$Severity)
 
-testData1 = newcrime1[-train1,]
-Severity.test = Severity[-train1]
-
-tree1 = tree(Severity~.-Severity,newcrime1,subset=train1)
-tree1.pred = predict(tree1, testData1, type="class")
-table(tree1.pred, Severity.test)
-
-cat("The misclassification rate for the testing data is",(25+879)/5000)
+cat("The misclassification rate for the testing data is",(244+60144)/(115188+244+60144+27631))
 
 #Testing performance of tree2
-train2 = sample(1:nrow(newcrime3), 5000)
+crime.treePredict2=predict(tree2, newdata = testdatafinal, type="class")
+table(crime.treePredict2, testdatafinal$Severity)
 
-testData2 = newcrime3[-train2,]
-Severity.test = Severity[-train2]
-
-tree2 = tree(Severity~.-Severity,newcrime3,subset=train2)
-tree2.pred = predict(tree2, testData2, type="class")
-table(tree2.pred, Severity.test)
-
-cat("The misclassification rate for the testing data is",(1347+513)/5000)
+cat("The misclassification rate for the testing data is",(14890+37197)/(138135+14890+37197+12985))
 
 #Cross validation
 #Applying to tree1
