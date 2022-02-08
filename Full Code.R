@@ -311,26 +311,128 @@ cat("The misclassification rate for the testing data is",(14261+35951)/(130922+1
 
 #Random forests
 #With weapon
-rf.newcrime1 = randomForest(Severity~., data = traindatafinal, mtry = 5, importance = T)
-rf.newcrime1
-varImpPlot(rf.newcrime1, col = c('red', 'blue'))
+rf.crime1 = randomForest(Severity~., data = traindatafinal, mtry = 5, importance = T)
+rf.crime1
+varImpPlot(rf.crime1, col = c('red', 'blue'))
 
-test.rf1 = predict(rf.newcrime1, newdata = testdatafinal, type = 'class')
+test.rf1 = predict(rf.crime1, newdata = testdatafinal, type = 'class')
 table(test.rf1, testdatafinal$Severity)
 
 cat("The misclassification rate for the testing data is",(1126+52587)/(114286+1126+52587+25586))
 
 #Without weapon
-rf.newcrime2 = randomForest(Severity~.-Weapon, data = traindatafinal, mtry = 5, importance = T)
-rf.newcrime2
-varImpPlot(rf.newcrime2, col = c('red', 'blue'))
+rf.crime2 = randomForest(Severity~.-Weapon, data = traindatafinal, mtry = 5, importance = T)
+rf.crime2
+varImpPlot(rf.crime2, col = c('red', 'blue'))
 
-test.rf2 = predict(rf.newcrime2, newdata = testdatafinal, type = 'class')
+test.rf2 = predict(rf.crime2, newdata = testdatafinal, type = 'class')
 table(test.rf2, testdatafinal$Severity)
 
 cat("The misclassification rate for the testing data is",(9090+52187)/(114686+9090+52187+17622))
 
 #Logistic regression
+#Converting factors to numeric
+traindatafinal$Weapon <- as.numeric(traindatafinal$Weapon) - 1
+traindatafinal$Female <- as.numeric(traindatafinal$Female) - 1
+traindatafinal$SFamDwelling = as.numeric(traindatafinal$SFamDwelling) - 1
+traindatafinal$Street = as.numeric(traindatafinal$Street) - 1
+traindatafinal$MUDwelling = as.numeric(traindatafinal$MUDwelling) - 1
+traindatafinal$Parking = as.numeric(traindatafinal$Parking) - 1
+traindatafinal$Sidewalk = as.numeric(traindatafinal$Sidewalk) - 1
+traindatafinal$Vehicle = as.numeric(traindatafinal$Vehicle) - 1
+traindatafinal$OtherBusiness = as.numeric(traindatafinal$OtherBusiness) - 1
+traindatafinal$Garage = as.numeric(traindatafinal$Garage) - 1
+traindatafinal$Driveway = as.numeric(traindatafinal$Driveway) - 1
+traindatafinal$UnderParking = as.numeric(traindatafinal$UnderParking) - 1
+traindatafinal$OtherPremise = as.numeric(traindatafinal$OtherPremise) - 1
+traindatafinal$Asian = as.numeric(traindatafinal$Asian) - 1
+traindatafinal$Black = as.numeric(traindatafinal$Black) - 1
+traindatafinal$Hispanic = as.numeric(traindatafinal$Hispanic) - 1
+traindatafinal$White = as.numeric(traindatafinal$White) - 1
+traindatafinal$OtherRace = as.numeric(traindatafinal$OtherRace) - 1
+traindatafinal$Morning = as.numeric(traindatafinal$Morning) - 1
+traindatafinal$Day = as.numeric(traindatafinal$Day) - 1
+traindatafinal$Evening = as.numeric(traindatafinal$Evening) - 1
+traindatafinal$Night = as.numeric(traindatafinal$Night) - 1
+traindatafinal$Valley = as.numeric(traindatafinal$Valley) - 1
+traindatafinal$West = as.numeric(traindatafinal$West) - 1
+traindatafinal$South = as.numeric(traindatafinal$South) - 1
+traindatafinal$Central = as.numeric(traindatafinal$Central) - 1
+
+testdatafinal$Weapon <- as.numeric(testdatafinal$Weapon) - 1
+testdatafinal$Female <- as.numeric(testdatafinal$Female) - 1
+testdatafinal$SFamDwelling = as.numeric(testdatafinal$SFamDwelling) - 1
+testdatafinal$Street = as.numeric(testdatafinal$Street) - 1
+testdatafinal$MUDwelling = as.numeric(testdatafinal$MUDwelling) - 1
+testdatafinal$Parking = as.numeric(testdatafinal$Parking) - 1
+testdatafinal$Sidewalk = as.numeric(testdatafinal$Sidewalk) - 1
+testdatafinal$Vehicle = as.numeric(testdatafinal$Vehicle) - 1
+testdatafinal$OtherBusiness = as.numeric(testdatafinal$OtherBusiness) - 1
+testdatafinal$Garage = as.numeric(testdatafinal$Garage) - 1
+testdatafinal$Driveway = as.numeric(testdatafinal$Driveway) - 1
+testdatafinal$UnderParking = as.numeric(testdatafinal$UnderParking) - 1
+testdatafinal$OtherPremise = as.numeric(testdatafinal$OtherPremise) - 1
+testdatafinal$Asian = as.numeric(testdatafinal$Asian) - 1
+testdatafinal$Black = as.numeric(testdatafinal$Black) - 1
+testdatafinal$Hispanic = as.numeric(testdatafinal$Hispanic) - 1
+testdatafinal$White = as.numeric(testdatafinal$White) - 1
+testdatafinal$OtherRace = as.numeric(testdatafinal$OtherRace) - 1
+testdatafinal$Morning = as.numeric(testdatafinal$Morning) - 1
+testdatafinal$Day = as.numeric(testdatafinal$Day) - 1
+testdatafinal$Evening = as.numeric(testdatafinal$Evening) - 1
+testdatafinal$Night = as.numeric(testdatafinal$Night) - 1
+testdatafinal$Valley = as.numeric(testdatafinal$Valley) - 1
+testdatafinal$West = as.numeric(testdatafinal$West) - 1
+testdatafinal$South = as.numeric(testdatafinal$South) - 1
+testdatafinal$Central = as.numeric(testdatafinal$Central) - 1
+
+#Modelling with weapon
+names(crime)
+logistic.crime=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Asian+Black+Hispanic+White+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.crime)
+logistic.crime2=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+OtherBusiness+Garage+UnderParking+Asian+Black+Hispanic+White+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.crime2)
+logistic.crime3=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+Garage+UnderParking+Asian+Black+Hispanic+White+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.crime3)
+logistic.crime4=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+Garage+UnderParking+Asian+Black+Hispanic+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.crime4)
+logistic.crime5=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+UnderParking+Asian+Black+Hispanic+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.crime5)
+logistic.crime6=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+UnderParking+Black+Hispanic+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.crime6)
+logistic.crime7=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+Black+Hispanic+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.crime7)
+logistic.crime8=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+Black+Hispanic+Morning+Day+Night+Central+South, data=traindatafinal,family=binomial)
+summary(logistic.crime8)
+
+contrasts(testdatafinal$Severity)
+
+logistic.test1= predict(logistic.crime7, testdatafinal, type = 'response')
+pred.crimeseverity1= rep('Non-Severe',193585)
+pred.crimeseverity1[logistic.test1 > 0.5] = 'Severe'
+table(pred.crimeseverity1, testdatafinal$Severity)
+
+cat("The misclassification rate for the testing data is",(1261+52503)/(114370+1261+52503+25451))
+
+#Logistic regression model without weapon
+logistic.newcrime=glm(Severity~VictAge+Female+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Asian+Black+Hispanic+White+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.newcrime)
+logistic.newcrime2=glm(Severity~VictAge+Female+SFamDwelling+Street+MUDwelling+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Asian+Black+Hispanic+White+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.newcrime2)
+logistic.newcrime3=glm(Severity~VictAge+Female+SFamDwelling+Street+MUDwelling+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Black+Hispanic+White+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.newcrime3)
+logistic.newcrime4=glm(Severity~VictAge+Female+SFamDwelling+Street+MUDwelling+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Black+Hispanic+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
+summary(logistic.newcrime4)
+logistic.newcrime5=glm(Severity~VictAge+Female+SFamDwelling+Street+MUDwelling+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Black+Hispanic+Morning+Day+Night+Central+South, data=traindatafinal,family=binomial)
+summary(logistic.newcrime5)
+
+logistic.test2= predict(logistic.newcrime4, testdatafinal, type = 'response')
+pred.crimeseverity2= rep('Non-Severe',193585)
+pred.crimeseverity2[logistic.test2 > 0.5] = 'Severe'
+table(pred.crimeseverity2, testdatafinal$Severity)
+
+cat("The misclassification rate for the testing data is",(8203+58025)/(108848+8203+58025+18509))
+
 
 #ROC Curves for all models
 #Tree model 1
@@ -354,11 +456,35 @@ abline(0,1)
 performance(prediction.tree2, measure = "auc")@y.values
 
 #Random forests
-#With weapon
+#With weapons
 
-#Without weapon
+#Without weapons
 
 #Logistic regression
-#With weapon
+#With weapons
+pred.rf1 <- predict(rf.crime1, newdata=testdatafinal)
+roc.test <- roc(test$outcome, test.predictions$votes[,2])
+auc(roc.test)
 
-#Without weapon
+#Without weapons
+
+#Logistic regression
+#With weapons
+pred.glm1 = predict(logistic.crime7, testdatafinal, type="response")
+prediction.glm1 = prediction(pred.glm1, testdatafinal$Severity)
+rocGlm1 = performance(prediction.glm1, measure = "tpr", x.measure = "fpr")
+
+plot(rocGlm1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Logistic Regression with weapons")
+abline(0,1)
+
+performance(prediction.glm1, measure = "auc")@y.values
+
+#Without weapons
+pred.glm2 = predict(logistic.newcrime4, testdatafinal, type="response")
+prediction.glm2 = prediction(pred.glm2, testdatafinal$Severity)
+rocGlm2 = performance(prediction.glm2, measure = "tpr", x.measure = "fpr")
+
+plot(rocGlm2, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Logistic Regression without weapons")
+abline(0,1)
+
+performance(prediction.glm2, measure = "auc")@y.values
