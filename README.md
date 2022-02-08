@@ -19,6 +19,7 @@ For this project, we used the 2020 - Present dataset which can be found here: [L
 ### References
 1. [Decision and classification trees](https://www.datacamp.com/community/tutorials/decision-trees-R)
 2. [Predictive policing - part 1](https://www.liberties.eu/en/stories/predictive-policing/43679)
-3. [Crime forecasting](https://vciba.springeropen.com/articles/10.1186/s42492-021-00075-z#:~:text=Crime%20forecasting%20refers%20to%20the,record%20some%20unusual%20illegal%20activity.)
-4. [Predictive policing - part 2](https://www.rand.org/content/dam/rand/pubs/research_briefs/RB9700/RB9735/RAND_RB9735.pdf)
+3. [Predictive policing - part 2](https://www.rand.org/content/dam/rand/pubs/research_briefs/RB9700/RB9735/RAND_RB9735.pdf)
+4. [Crime forecasting](https://vciba.springeropen.com/articles/10.1186/s42492-021-00075-z#:~:text=Crime%20forecasting%20refers%20to%20the,record%20some%20unusual%20illegal%20activity.)
 5. [Crime trends in California](https://www.ppic.org/publication/crime-trends-in-california/)
+6. [ROC Curves](https://www.displayr.com/what-is-a-roc-curve-how-to-interpret-it/)
