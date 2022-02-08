@@ -1,0 +1,262 @@
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(DataCombine)
+library(tidyverse)
+library(cowplot)
+library(tree)
+library(randomForest)
+library(ROCR)
+
+crime2019 = read_csv("Crime_Data_from_2010_to_2019.csv")
+dim(crime2019)
+
+crime = read_csv("Crime_Data_from_2020_to_Present.csv")
+dim(crime)
+
+#Data cleaning
+#Checking for duplicate entries
+crime2019 <- distinct(crime2019)
+dim(crime2019)
+
+crime2019$AREA <- as.numeric(crime2019$AREA)
+
+crime <- distinct(crime)
+dim(crime)
+
+crime$AREA <- as.numeric(crime$AREA)
+class(crime$AREA)
+
+#Deciding whether to use only 2019-2020 data, proportions of crime severity is roughly the same
+summary(crime2019$`Crm Cd`)
+summary(crime$`Crm Cd`)
+
+crime2019d <- density(crime2019$`Crm Cd`)
+crimed <- density(crime$`Crm Cd`)
+
+par(mfrow=c(1,2))
+plot(crime2019d, main="Density of crime severity for 2010-2019")
+plot(crimed, main="Density of crime severity for 2019-2020")
+
+#Renaming all the columns
+names(crime) <- c('RecNo','ReportDate','DateOCC','TimeOCC','Area','AreaName','DistrictNo','Part','CrimeCode','CrmDesc','Mocodes','VictAge','VictSex','VictRace','PremiseCd','PremiseDesc','WeaponCd','WeaponDesc','Status','StatusDesc','CrimeCd1','CrimeCd2','CrimeCd3','CrimeCd4','Location','CrossStreet','Lat','Lon')
+
+#Checking for null entries in our predictors
+sum(is.na(crime$DateOCC))
+sum(is.na(crime$TimeOCC))
+sum(is.na(crime$Area))
+sum(is.na(crime$RecNo))
+sum(is.na(crime$CrimeCode))
+sum(is.na(crime$DistrictNo))
+sum(is.na(crime$Mocodes))
+sum(is.na(crime$VictAge))
+sum(is.na(crime$VictSex))
+sum(is.na(crime$VictRace))
+sum(is.na(crime$PremiseCd))
+sum(is.na(crime$PremiseDesc))
+sum(is.na(crime$WeaponCd))
+#Mocodes, VictSex, VictRace, PremiseCd, WeaponCd have null entries
+
+#Removing records with null values and illogical values
+crime <- crime[!is.na(crime$Mocodes),]
+crime <- crime[!is.na(crime$VictAge),]
+crime <- crime[!is.na(crime$VictSex),]
+crime <- crime[!is.na(crime$VictRace),]
+crime <- crime[!is.na(crime$PremiseDesc),]
+crime <- crime[!is.na(crime$PremiseCd),]
+
+#Replacing null values with 0 for WeaponCd to denote no weapon involved
+crime$WeaponCd[is.na(crime$WeaponCd)] <- 0
+
+sum(is.na(crime$Mocodes))
+sum(is.na(crime$VictAge))
+sum(is.na(crime$VictSex))
+sum(is.na(crime$VictRace))
+sum(is.na(crime$PremiseCd))
+sum(is.na(crime$WeaponCd))
+
+dim(crime)
+
+#Removing unknown records in VictSex and VictRace, Removing 0 in VictAge
+crime <- crime[!(crime$VictSex=="X"),]
+crime <- crime[!(crime$VictRace=="X"),]
+crime <- crime[!(crime$VictAge==0),]
+dim(crime)
+
+attach(crime)
+crime = subset(crime, select = -c(CrimeCd2,CrimeCd3,CrimeCd4))
+crime = subset(crime, select = -c(Lat, Lon, RecNo,DateOCC,DistrictNo,ReportDate,CrossStreet,Location,StatusDesc,Status,WeaponDesc, Mocodes, CrmDesc, Part, AreaName))
+
+#Transforming columns - CrimeCode
+Severity = ifelse(crime$CrimeCd1 < 300, 'Severe', 'Non-Severe')
+Severity = as.factor(Severity)
+crime <- data.frame(crime, Severity)
+
+#Removing CrimeCode and CrimeCd1 as Severity has replaced it
+crime = subset(crime, select = -c(CrimeCode,CrimeCd1))
+
+#Transforming columns - VictSex and Weapon
+Female <-ifelse(crime$VictSex == "F", 'Yes', 'No')
+Female <- as.factor(Female)
+crime <- data.frame(crime, Female)
+
+Weapon <-ifelse(crime$WeaponCd == 0, 'No', 'Yes')
+Weapon <- as.factor(Weapon)
+crime <- data.frame(crime, Weapon)
+
+crime = subset(crime, select = -c(VictSex,WeaponCd))
+
+#Exploratory Data Analysis
+
+#taking Severe Crimes only
+severeexploratory = crime[!(crime$Severity=="Non-Severe"),]   
+
+severeexploratory$TimeOCC = as.numeric(severeexploratory$TimeOCC)
+
+#Time
+TimeBar = ggplot(severeexploratory, aes(x = TimeOCC)) +
+  geom_bar(stat = 'count', fill = 'red') +
+  labs(x = 'Time of Crime', y = 'Number of Severe Crimes') +
+  scale_x_continuous(limit = c(0,2400,0.1)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Area
+severeexploratory$Area = as.factor(severeexploratory$Area)
+
+AreaBar = ggplot(severeexploratory, aes(x = Area)) +
+  geom_bar(stat = 'count', fill = 'blue') +
+  labs(x = 'Area', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+ 
+#Sex
+VictSexBar = ggplot(severeexploratory, aes(x = Female)) +
+  geom_bar(stat = 'count', fill = c('red', 'green')) +
+  labs(x = 'Is the Victim Female?', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Race
+VictRaceBar = ggplot(severeexploratory, aes(x = VictRace)) +
+  geom_bar(stat = 'count', fill = c('purple')) +
+  labs(x = 'Race', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Age
+AgeDescBar = ggplot(severeexploratory, aes(x = VictAge)) +
+  geom_bar(stat = 'count', fill = c('orange')) +
+  labs(x = 'AgeDesc', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Premise
+severeexploratory$PremiseDesc = as.factor(severeexploratory$PremiseDesc)
+
+PremiseDescBar = ggplot(severeexploratory, aes(x = PremiseDesc)) +
+  geom_bar(stat = 'count', fill = c('black')) +
+  labs(x = 'PremiseDesc', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank()) +
+  theme(axis.text = element_blank()) +
+  theme(axis.ticks = element_blank())
+
+plot_grid(AreaBar, VictSexBar, TimeBar, AgeDescBar, VictRaceBar, PremiseDescBar, VictWeapBar)
+
+#Weapon
+VictWeapBar = ggplot(severeexploratory, aes(x = Weapon)) +
+  geom_bar(stat = 'count', fill = c('red', 'green')) +
+  labs(x = 'Was a Weapon Involved?', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+  
+ VictWeapBar
+ 
+#Splitting premise into 4 categories: Commercial, residential, industrial and outdoors
+premisetable <- table(crime['PremiseDesc'])
+premisetable <- sort(premisetable,decreasing = TRUE)
+premisetable[1:10]
+
+cat('Percentage of top 10 premises:',sum(premisetable[1:10])/nrow(crime)*100,'%')
+
+OtherPremise = case_when(crime$PremiseDesc =='SINGLE FAMILY DWELLING'~'No',crime$PremiseDesc =='STREET'~'No',crime$PremiseDesc =='MULTI-UNIT DWELLING (APARTMENT, DUPLEX, ETC)'~'No',crime$PremiseDesc =='PARKING LOT'~'No',crime$PremiseDesc =='SIDEWALK'~'No',crime$PremiseDesc =='VEHICLE, PASSENGER/TRUCK'~'No',crime$PremiseDesc =='OTHER BUSINESS'~'No',crime$PremiseDesc =='GARAGE/CARPORT'~'No',crime$PremiseDesc =='DRIVEWAY'~'No',crime$PremiseDesc =='PARKING UNDERGROUND/BUILDING'~'No')
+SFamDwelling = case_when(crime$PremiseDesc == 'SINGLE FAMILY DWELLING'~'Yes')
+Street = case_when(crime$PremiseDesc == 'STREET'~'Yes')
+MUDwelling = case_when(crime$PremiseDesc == 'MULTI-UNIT DWELLING (APARTMENT, DUPLEX, ETC)'~'Yes')
+Parking = case_when(crime$PremiseDesc == 'PARKING LOT'~'Yes')
+Sidewalk = case_when(crime$PremiseDesc == 'SIDEWALK'~'Yes')
+Vehicle = case_when(crime$PremiseDesc=='VEHICLE, PASSENGER/TRUCK'~'Yes')
+OtherBusiness = case_when(crime$PremiseDesc == 'OTHER BUSINESS'~'Yes')
+Garage = case_when(crime$PremiseDesc == 'GARAGE/CARPORT'~'Yes')
+Driveway = case_when(crime$PremiseDesc == 'DRIVEWAY'~'Yes')
+UnderParking = case_when(crime$PremiseDesc=='PARKING UNDERGROUND/BUILDING'~'Yes')
+
+crime = cbind(crime,SFamDwelling,Street,MUDwelling,Parking,Sidewalk,Vehicle,OtherBusiness,Garage,Driveway,UnderParking,OtherPremise)
+crime$OtherPremise[is.na(crime$OtherPremise)] <- 'Yes'
+crime[is.na(crime)] <- 'No'
+
+crime <- subset(crime, select = -c(PremiseCd,PremiseDesc))
+
+#Splitting race by groups
+Asian = case_when(crime$VictRace == 'A' ~ 'Yes', crime$VictRace == 'C' ~ 'Yes', crime$VictRace == 'D' ~ 'Yes', crime$VictRace == 'F' ~ 'Yes', crime$VictRace == 'J' ~ 'Yes', crime$VictRace == 'K' ~ 'Yes', crime$VictRace == 'L' ~ 'Yes', crime$VictRace == 'V' ~ 'Yes', crime$VictRace == 'Z' ~ 'Yes', TRUE ~ 'No')
+table(Asian)
+Black = ifelse(crime$VictRace == 'B', 'Yes', 'No')
+Hispanic = ifelse(crime$VictRace == 'H', 'Yes', 'No')
+White = ifelse(crime$VictRace == 'W', 'Yes', 'No')
+OtherRace = case_when(crime$VictRace == 'O' ~ 'Yes', crime$VictRace == 'G' ~ 'Yes', crime$VictRace == 'I' ~ 'Yes', crime$VictRace == 'P' ~ 'Yes', crime$VictRace == 'S' ~ 'Yes', crime$VictRace == 'U' ~ 'Yes', TRUE ~ 'No')
+crime = cbind(crime,Asian,Black,Hispanic,White,OtherRace)
+
+crime <- subset(crime, select = -c(VictRace))
+
+
+crime$TimeOCC = as.numeric(crime$TimeOCC)
+
+#Splitting time into 4 groups  
+Morning = ifelse(crime$TimeOCC <= 1159 & crime$TimeOCC >= 600, 'Yes', 'No')
+Day = ifelse(crime$TimeOCC <= 1759 & crime$TimeOCC >= 1200, 'Yes', 'No')
+Evening = ifelse(crime$TimeOCC <= 2359 & crime$TimeOCC >= 1800, 'Yes', 'No')
+Night = ifelse(crime$TimeOCC <= 559 & crime$TimeOCC >= 0000, 'Yes', 'No')
+crime = cbind(crime, Morning, Day, Evening, Night)
+
+crime <- subset(crime, select = -c(TimeOCC))
+
+
+#Splitting area into 4 boroughs: Valley, West, Central and South
+Valley = case_when(crime$Area == 9 ~ 'Yes', crime$Area == 10 ~ 'Yes', crime$Area == 15 ~ 'Yes', crime$Area == 16 ~ 'Yes', crime$Area == 17 ~ 'Yes', crime$Area == 19 ~ 'Yes', crime$Area == 21 ~ 'Yes', TRUE ~ 'No')
+West = case_when(crime$Area == 6 ~ 'Yes', crime$Area == 7 ~ 'Yes', crime$Area == 8 ~ 'Yes', crime$Area == 14 ~ 'Yes', crime$Area == 20 ~ 'Yes', TRUE ~ 'No')
+Central = case_when(crime$Area == 1 ~ 'Yes', crime$Area == 2 ~ 'Yes', crime$Area == 4 ~ 'Yes', crime$Area == 11 ~ 'Yes', crime$Area == 13 ~ 'Yes', TRUE ~ 'No')
+South = case_when(crime$Area == 3 ~ 'Yes', crime$Area == 5 ~ 'Yes', crime$Area == 12 ~ 'Yes', crime$Area == 18 ~ 'Yes', TRUE ~ 'No')
+crime = cbind(crime, Valley, West, South, Central)
+
+crime <- subset(crime, select = -c(Area))
+
+View(crime)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
