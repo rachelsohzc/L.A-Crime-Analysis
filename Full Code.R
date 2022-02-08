@@ -1,8 +1,4 @@
-library(readr)
-library(dplyr)
-library(ggplot2)
-library(DataCombine)
-library(tidyverse)
+library(readr); library(dplyr); library(ggplot2); library(DataCombine); library(tidyverse); library(cowplot); library(tree); library(randomForest); library(ROCR)
 
 crime2019 = read_csv("Crime_Data_from_2010_to_2019.csv")
 dim(crime2019)
@@ -73,12 +69,12 @@ sum(is.na(crime$WeaponCd))
 
 dim(crime)
 
-#Removing unknown records in VictSex and VictRace
+#Removing unknown records in VictSex and VictRace, Removing 0 in VictAge
 crime <- crime[!(crime$VictSex=="X"),]
 crime <- crime[!(crime$VictRace=="X"),]
+crime <- crime[!(crime$VictAge==0),]
 dim(crime)
 
-#Removing columns we do not need
 attach(crime)
 crime = subset(crime, select = -c(CrimeCd2,CrimeCd3,CrimeCd4))
 crime = subset(crime, select = -c(Lat, Lon, RecNo,DateOCC,DistrictNo,ReportDate,CrossStreet,Location,StatusDesc,Status,WeaponDesc, Mocodes, CrmDesc, Part, AreaName))
@@ -101,6 +97,78 @@ Weapon <- as.factor(Weapon)
 crime <- data.frame(crime, Weapon)
 
 crime = subset(crime, select = -c(VictSex,WeaponCd))
+
+#Exploratory Data Analysis
+#Taking Severe Crimes only
+severeexploratory = crime[!(crime$Severity=="Non-Severe"),]   
+severeexploratory$TimeOCC = as.numeric(severeexploratory$TimeOCC)
+
+#Time
+TimeBar = ggplot(severeexploratory, aes(x = TimeOCC)) +
+  geom_bar(stat = 'count', fill = 'red') +
+  labs(x = 'Time of Crime', y = 'Number of Severe Crimes') +
+  scale_x_continuous(limit = c(0,2400,0.1)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Area
+severeexploratory$Area = as.factor(severeexploratory$Area)
+
+AreaBar = ggplot(severeexploratory, aes(x = Area)) +
+  geom_bar(stat = 'count', fill = 'blue') +
+  labs(x = 'Area', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Sex
+VictSexBar = ggplot(severeexploratory, aes(x = Female)) +
+  geom_bar(stat = 'count', fill = c('red', 'green')) +
+  labs(x = 'Is the Victim Female?', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Race
+VictRaceBar = ggplot(severeexploratory, aes(x = VictRace)) +
+  geom_bar(stat = 'count', fill = c('purple')) +
+  labs(x = 'Race', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Age
+AgeDescBar = ggplot(severeexploratory, aes(x = VictAge)) +
+  geom_bar(stat = 'count', fill = c('orange')) +
+  labs(x = 'AgeDesc', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+#Premise
+severeexploratory$PremiseDesc = as.factor(severeexploratory$PremiseDesc)
+
+PremiseDescBar = ggplot(severeexploratory, aes(x = PremiseDesc)) +
+  geom_bar(stat = 'count', fill = c('black')) +
+  labs(x = 'PremiseDesc', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank()) +
+  theme(axis.text = element_blank()) +
+  theme(axis.ticks = element_blank())
+
+plot_grid(AreaBar, VictSexBar, TimeBar, AgeDescBar, VictRaceBar, PremiseDescBar, VictWeapBar)
+
+#Weapon
+VictWeapBar = ggplot(severeexploratory, aes(x = Weapon)) +
+  geom_bar(stat = 'count', fill = c('red', 'green')) +
+  labs(x = 'Was a Weapon Involved?', y = 'Number of Severe Crimes') +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank())
+
+VictWeapBar
 
 #Splitting premise into 4 categories: Commercial, residential, industrial and outdoors
 premisetable <- table(crime['PremiseDesc'])
@@ -136,6 +204,9 @@ White = ifelse(crime$VictRace == 'W', 'Yes', 'No')
 OtherRace = case_when(crime$VictRace == 'O' ~ 'Yes', crime$VictRace == 'G' ~ 'Yes', crime$VictRace == 'I' ~ 'Yes', crime$VictRace == 'P' ~ 'Yes', crime$VictRace == 'S' ~ 'Yes', crime$VictRace == 'U' ~ 'Yes', TRUE ~ 'No')
 crime = cbind(crime,Asian,Black,Hispanic,White,OtherRace)
 
+crime <- subset(crime, select = -c(VictRace))
+
+
 crime$TimeOCC = as.numeric(crime$TimeOCC)
 
 #Splitting time into 4 groups  
@@ -145,13 +216,7 @@ Evening = ifelse(crime$TimeOCC <= 2359 & crime$TimeOCC >= 1800, 'Yes', 'No')
 Night = ifelse(crime$TimeOCC <= 559 & crime$TimeOCC >= 0000, 'Yes', 'No')
 crime = cbind(crime, Morning, Day, Evening, Night)
 
-crime <- subset(crime, select = -c(VictRace,TimeOCC))
-
-Valley = case_when(crime$Area == 9 ~ 'Yes', crime$Area == 10 ~ 'Yes', crime$Area == 15 ~ 'Yes', crime$Area == 16 ~ 'Yes', crime$Area == 17 ~ 'Yes', crime$Area == 19 ~ 'Yes', crime$Area == 21 ~ 'Yes', TRUE ~ 'No')
-West = case_when(crime$Area == 6 ~ 'Yes', crime$Area == 7 ~ 'Yes', crime$Area == 8 ~ 'Yes', crime$Area == 14 ~ 'Yes', crime$Area == 20 ~ 'Yes', TRUE ~ 'No')
-Central = case_when(crime$Area == 1 ~ 'Yes', crime$Area == 2 ~ 'Yes', crime$Area == 4 ~ 'Yes', crime$Area == 11 ~ 'Yes', crime$Area == 13 ~ 'Yes', TRUE ~ 'No')
-South = case_when(crime$Area == 3 ~ 'Yes', crime$Area == 5 ~ 'Yes', crime$Area == 12 ~ 'Yes', crime$Area == 18 ~ 'Yes', TRUE ~ 'No')
-crime = cbind(crime, Valley, West, South, Central)
+crime <- subset(crime, select = -c(TimeOCC))
 
 #Splitting area into 4 boroughs: Valley, West, Central and South
 Valley = case_when(crime$Area == 9 ~ 'Yes', crime$Area == 10 ~ 'Yes', crime$Area == 15 ~ 'Yes', crime$Area == 16 ~ 'Yes', crime$Area == 17 ~ 'Yes', crime$Area == 19 ~ 'Yes', crime$Area == 21 ~ 'Yes', TRUE ~ 'No')
@@ -160,7 +225,7 @@ Central = case_when(crime$Area == 1 ~ 'Yes', crime$Area == 2 ~ 'Yes', crime$Area
 South = case_when(crime$Area == 3 ~ 'Yes', crime$Area == 5 ~ 'Yes', crime$Area == 12 ~ 'Yes', crime$Area == 18 ~ 'Yes', TRUE ~ 'No')
 crime = cbind(crime, Valley, West, South, Central)
 
-crime <- subset(crime, select = -c(VictRace,TimeOCC,Area))
+crime <- subset(crime, select = -c(Area))
 
 View(crime)
 
@@ -213,22 +278,22 @@ text(tree2, pretty = 0)
 #Applying to tree1
 cv.crime1 = cv.tree(tree1, FUN=prune.misclass)
 
-#Picking 2 nodes because our original already has 4 nodes
+#Picking 3 nodes because our original already has 4 nodes
 cv.crime1$size
 cv.crime1$dev
 
-prune.crime1 = prune.misclass(tree1,best=2)
+prune.crime1 = prune.misclass(tree1,best=3)
 plot(prune.crime1)
 text(prune.crime1, pretty=0)
 
 #Applying to tree2
 cv.crime2 = cv.tree(tree2, FUN=prune.misclass)
 
-#Picking 4 nodes
+#Picking 3 nodes
 cv.crime2$size
 cv.crime2$dev
 
-prune.crime2 = prune.misclass(tree2,best=4)
+prune.crime2 = prune.misclass(tree2,best=3)
 plot(prune.crime2)
 text(prune.crime2, pretty=0)
 
@@ -236,78 +301,36 @@ text(prune.crime2, pretty=0)
 crime.treePredict1=predict(prune.crime1, newdata = testdatafinal, type="class")
 table(crime.treePredict1, testdatafinal$Severity)
 
-cat("The misclassification rate for the testing data is",(252+60149)/(115183+252+60149+27633))
+cat("The misclassification rate for the testing data is",(28+59098)/(107775+28+59095+26684))
 
 #Testing performance of tree2
 crime.treePredict2=predict(prune.crime2, newdata = testdatafinal, type="class")
-table(tree.Predict2, testdatafinal$Severity)
+table(crime.treePredict2, testdatafinal$Severity)
 
-cat("The misclassification rate for the testing data is",(10345+63950)/(111382+10345+63950+17530))
+cat("The misclassification rate for the testing data is",(14261+35951)/(130922+14261+35951+12451))
 
-#Logistic regression modelling
-library(GGally)
+#Random forests
+#With weapon
+rf.newcrime1 = randomForest(Severity~., data = traindatafinal, mtry = 5, importance = T)
+rf.newcrime1
+varImpPlot(rf.newcrime1, col = c('red', 'blue'))
 
-#Altering Yes/No variables for the model
-newcrime$Weapon <- as.character(newcrime$Weapon)
-newcrime$Female <- as.character(newcrime$Female)
+test.rf1 = predict(rf.newcrime1, newdata = testdatafinal, type = 'class')
+table(test.rf1, testdatafinal$Severity)
 
-newcrime[newcrime=="Yes"] <- 1
-newcrime[newcrime=="No"] <- 0
+cat("The misclassification rate for the testing data is",(1126+52587)/(114286+1126+52587+25586))
 
-#newcrime$Severity <- as.character(newcrime$Severity)
-#newcrime[newcrime=="Severe"] <- 1
-#newcrime[newcrime=="Non-Severe"] <- 0
-#newcrime$Severity <- as.factor(newcrime$Severity)
+#Without weapon
+rf.newcrime2 = randomForest(Severity~.-Weapon, data = traindatafinal, mtry = 5, importance = T)
+rf.newcrime2
+varImpPlot(rf.newcrime2, col = c('red', 'blue'))
 
-convertcols <- c("RecNo", "DateOCC", "DistrictNo", "Female", "Weapon", "SFamDwelling", "Street","MUDwelling", "Parking", "Sidewalk", "Vehicle", "OtherBusiness", "Garage", "Driveway", "UnderParking", "OtherPremise", "Asian", "Black", "Hispanic", "White", "OtherRace", "Morning", "Day", "Evening", "Night")
-newcrime[convertcols] <- lapply(newcrime[convertcols],factor)
-sapply(newcrime, class)
+test.rf2 = predict(rf.newcrime2, newdata = testdatafinal, type = 'class')
+table(test.rf2, testdatafinal$Severity)
 
-#Modelling
-summary(newcrime)
-ggpairs(newcrime[,5:30])
+cat("The misclassification rate for the testing data is",(9090+52187)/(114686+9090+52187+17622))
 
-#Take all columns except DateOCC and Severity to convert into numeric
-#Auto code
-grep("DateOCC", colnames(newcrime))
-grep("Severity", colnames(newcrime))
-
-numconvert <- newcrime[,-c(2,8)]
-
-for (i in 1:ncol(newcrime[,numconvert])){
-  newcrime[,numconvert][,i] <- as.numeric(as.character(newcrime[,numconvert][,i]))
-}
-
-#Manual code
-newcrime$SFamDwelling = as.numeric(newcrime$SFamDwelling) - 1
-newcrime$Street = as.numeric(newcrime$Street) - 1
-newcrime$MUDwelling = as.numeric(newcrime$MUDwelling) - 1
-newcrime$Parking = as.numeric(newcrime$Parking) - 1
-newcrime$Sidewalk = as.numeric(newcrime$Sidewalk) - 1
-newcrime$Vehicle = as.numeric(newcrime$Vehicle) - 1
-newcrime$OtherBusiness = as.numeric(newcrime$OtherBusiness) - 1
-newcrime$Garage = as.numeric(newcrime$Garage) - 1
-newcrime$Driveway = as.numeric(newcrime$Driveway) - 1
-newcrime$UnderParking = as.numeric(newcrime$UnderParking) - 1
-newcrime$OtherPremise = as.numeric(newcrime$OtherPremise) - 1
-newcrime$Asian = as.numeric(newcrime$Asian) - 1
-newcrime$Black = as.numeric(newcrime$Black) - 1
-newcrime$Hispanic = as.numeric(newcrime$Hispanic) - 1
-newcrime$White = as.numeric(newcrime$White) - 1
-newcrime$OtherRace = as.numeric(newcrime$OtherRace) - 1
-newcrime$Morning = as.numeric(newcrime$Morning) - 1
-newcrime$Day = as.numeric(newcrime$Day) - 1
-newcrime$Evening = as.numeric(newcrime$Evening) - 1
-newcrime$Night = as.numeric(newcrime$Night) - 1
-newcrime$Valley = as.numeric(newcrime$Valley) - 1
-newcrime$West = as.numeric(newcrime$West) - 1
-newcrime$South = as.numeric(newcrime$South) - 1
-newcrime$Central = as.numeric(newcrime$Central) - 1
-
-#Modelling
-names(newcrime)
-logistic.newcrime=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+OtherPremise+Asian+Black+Hispanic+White+OtherRace+Morning+Day+Evening+Night, data=newcrime,family=binomial)
-summary(logistic.newcrime)
+#Logistic regression
 
 #ROC Curves for all models
 #Tree model 1
@@ -330,3 +353,12 @@ abline(0,1)
 
 performance(prediction.tree2, measure = "auc")@y.values
 
+#Random forests
+#With weapon
+
+#Without weapon
+
+#Logistic regression
+#With weapon
+
+#Without weapon
