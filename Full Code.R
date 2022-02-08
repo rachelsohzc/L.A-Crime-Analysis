@@ -309,8 +309,29 @@ table(crime.treePredict2, testdatafinal$Severity)
 
 cat("The misclassification rate for the testing data is",(14261+35951)/(130922+14261+35951+12451))
 
+#ROC Curves for our decision trees
+#Tree model 1
+pred.tree1 = predict(prune.crime1, testdatafinal, type="vector")
+prediction.tree1 = prediction(pred.tree1[,2], testdatafinal$Severity)
+rocTree1=performance(prediction.tree1, measure = "tpr", x.measure = "fpr")
+
+plot(rocTree1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 1")
+abline(0,1)
+
+performance(prediction.tree1, measure = "auc")@y.values
+
+#Tree model 2
+pred.tree2 = predict(prune.crime2, testdatafinal, type="vector")
+prediction.tree2 = prediction(pred.tree2[,2], testdatafinal$Severity)
+rocTree2=performance(prediction.tree2, measure = "tpr", x.measure = "fpr")
+
+plot(rocTree2, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 2")
+abline(0,1)
+
+performance(prediction.tree2, measure = "auc")@y.values
+
 #Random forests
-#With weapon
+#With weapons
 rf.crime1 = randomForest(Severity~., data = traindatafinal, mtry = 5, importance = T)
 rf.crime1
 varImpPlot(rf.crime1, col = c('red', 'blue'))
@@ -320,7 +341,7 @@ table(test.rf1, testdatafinal$Severity)
 
 cat("The misclassification rate for the testing data is",(1126+52587)/(114286+1126+52587+25586))
 
-#Without weapon
+#Without weapons
 rf.crime2 = randomForest(Severity~.-Weapon, data = traindatafinal, mtry = 5, importance = T)
 rf.crime2
 varImpPlot(rf.crime2, col = c('red', 'blue'))
@@ -329,6 +350,11 @@ test.rf2 = predict(rf.crime2, newdata = testdatafinal, type = 'class')
 table(test.rf2, testdatafinal$Severity)
 
 cat("The misclassification rate for the testing data is",(9090+52187)/(114686+9090+52187+17622))
+
+#ROC Curves for random forests
+#With weapons
+
+#Without weapons
 
 #Logistic regression
 #Converting factors to numeric
@@ -433,34 +459,7 @@ table(pred.crimeseverity2, testdatafinal$Severity)
 
 cat("The misclassification rate for the testing data is",(8203+58025)/(108848+8203+58025+18509))
 
-
-#ROC Curves for all models
-#Tree model 1
-pred.tree1 = predict(tree1, testdatafinal, type="vector")
-prediction.tree1 = prediction(pred.tree1[,2], testdatafinal$Severity)
-rocTree1=performance(prediction.tree1, measure = "tpr", x.measure = "fpr")
-
-plot(rocTree1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 1")
-abline(0,1)
-
-performance(prediction.tree1, measure = "auc")@y.values
-
-#Tree model 2
-pred.tree2 = predict(tree2, testdatafinal, type="vector")
-prediction.tree2 = prediction(pred.tree2[,2], testdatafinal$Severity)
-rocTree2=performance(prediction.tree2, measure = "tpr", x.measure = "fpr")
-
-plot(rocTree2, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 2")
-abline(0,1)
-
-performance(prediction.tree2, measure = "auc")@y.values
-
-#Random forests
-#With weapons
-
-#Without weapons
-
-#Logistic regression
+#ROC Curves for logistic regression
 #With weapons
 pred.rf1 <- predict(rf.crime1, newdata=testdatafinal)
 roc.test <- roc(test$outcome, test.predictions$votes[,2])
@@ -468,7 +467,7 @@ auc(roc.test)
 
 #Without weapons
 
-#Logistic regression
+
 #With weapons
 pred.glm1 = predict(logistic.crime7, testdatafinal, type="response")
 prediction.glm1 = prediction(pred.glm1, testdatafinal$Severity)
