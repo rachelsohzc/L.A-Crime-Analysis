@@ -207,7 +207,6 @@ crime <- subset(crime, select = -c(PremiseCd,PremiseDesc))
 
 #Splitting race by groups
 Asian = case_when(crime$VictRace == 'A' ~ 'Yes', crime$VictRace == 'C' ~ 'Yes', crime$VictRace == 'D' ~ 'Yes', crime$VictRace == 'F' ~ 'Yes', crime$VictRace == 'J' ~ 'Yes', crime$VictRace == 'K' ~ 'Yes', crime$VictRace == 'L' ~ 'Yes', crime$VictRace == 'V' ~ 'Yes', crime$VictRace == 'Z' ~ 'Yes', TRUE ~ 'No')
-table(Asian)
 Black = ifelse(crime$VictRace == 'B', 'Yes', 'No')
 Hispanic = ifelse(crime$VictRace == 'H', 'Yes', 'No')
 White = ifelse(crime$VictRace == 'W', 'Yes', 'No')
