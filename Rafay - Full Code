@@ -168,7 +168,7 @@ PremiseDescBar = ggplot(severeexploratory, aes(x = PremiseDesc)) +
   theme(axis.text = element_blank()) +
   theme(axis.ticks = element_blank())
 
-plot_grid(AreaBar, VictSexBar, TimeBar, AgeDescBar, VictRaceBar, PremiseDescBar, VictWeapBar)
+plot_grid(AreaBar, VictSexBar, TimeBar, AgeDescBar, VictRaceBar, PremiseDescBar)
 
 #Weapon
 VictWeapBar = ggplot(severeexploratory, aes(x = Weapon)) +
