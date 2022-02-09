@@ -10,6 +10,9 @@ For this project, we used the 2020 - Present dataset which can be found here: [L
 Run the code in R Script or view the R Markdown file.
 
 ### Improvements
+- Categorical data: 
+- More modelling:
+- Analysis limitations:
 
 ### Conclusion
 
