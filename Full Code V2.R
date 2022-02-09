@@ -27,8 +27,9 @@ crime2019d <- density(crime2019$`Crm Cd`)
 crimed <- density(crime$`Crm Cd`)
 
 par(mfrow=c(1,2))
-plot(crime2019d, main="Density of crime severity for 2010-2019")
-plot(crimed, main="Density of crime severity for 2019-2020")
+plot(crime2019d, main="Density of crime severity for 2010 - 2019", col="Navy blue")
+plot(crimed, main="Density of crime severity for 2020 - Present", col="Blue")
+par(mfrow=c(1,1))
 
 #Renaming all the columns
 names(crime) <- c('RecNo','ReportDate','DateOCC','TimeOCC','Area','AreaName','DistrictNo','Part','CrimeCode','CrmDesc','Mocodes','VictAge','VictSex','VictRace','PremiseCd','PremiseDesc','WeaponCd','WeaponDesc','Status','StatusDesc','CrimeCd1','CrimeCd2','CrimeCd3','CrimeCd4','Location','CrossStreet','Lat','Lon')
@@ -196,6 +197,9 @@ crime[is.na(crime)] <- 'No'
 crime <- subset(crime, select = -c(PremiseCd,PremiseDesc))
 
 #Splitting race by groups
+table(VictRace)
+cat('Percentage of Asians in our dataset:',5829/nrow(crime)*100,"%")
+
 Asian = case_when(crime$VictRace == 'A' ~ 'Yes', crime$VictRace == 'C' ~ 'Yes', crime$VictRace == 'D' ~ 'Yes', crime$VictRace == 'F' ~ 'Yes', crime$VictRace == 'J' ~ 'Yes', crime$VictRace == 'K' ~ 'Yes', crime$VictRace == 'L' ~ 'Yes', crime$VictRace == 'V' ~ 'Yes', crime$VictRace == 'Z' ~ 'Yes', TRUE ~ 'No')
 table(Asian)
 Black = ifelse(crime$VictRace == 'B', 'Yes', 'No')
@@ -268,6 +272,16 @@ summary(tree1)
 plot(tree1)
 text(tree1, pretty = 0)
 
+#Plotting tree 1 next to weapon percentage
+table(traindatafinal$Severity, traindatafinal$Weapon)
+cat('Percentage of severe crimes committed with weapons:',4961/(39+4961)*100,"%")
+cat('Percentage of non-severe crimes committed with weapons:',1699/(1699+3301)*100,"%")
+
+par(mfrow=c(1,2))
+plot(tree1); text(tree1, pretty = 0)
+plot(traindatafinal$Severity,traindatafinal$Weapon, xlab="Severity",ylab="Is there a weapon",col=c("Pink","Lavender"))
+par(mfrow=c(1,1))
+
 #Tree without weapons
 tree2 = tree(formula = Severity ~.-Weapon, data = traindatafinal)
 summary(tree2)
@@ -297,6 +311,12 @@ prune.crime2 = prune.misclass(tree2,best=3)
 plot(prune.crime2)
 text(prune.crime2, pretty=0)
 
+#Plotting both trees side by side
+par(mfrow=c(1,2))
+plot(prune.crime1); text(prune.crime1, pretty=0)
+plot(prune.crime2); text(prune.crime2, pretty=0)
+par(mfrow=c(1,1))
+
 #Testing performance of tree1
 crime.treePredict1=predict(prune.crime1, newdata = testdatafinal, type="class")
 table(crime.treePredict1, testdatafinal$Severity)
@@ -315,19 +335,17 @@ pred.tree1 = predict(prune.crime1, testdatafinal, type="vector")
 prediction.tree1 = prediction(pred.tree1[,2], testdatafinal$Severity)
 rocTree1=performance(prediction.tree1, measure = "tpr", x.measure = "fpr")
 
-plot(rocTree1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 1")
-abline(0,1)
-
-performance(prediction.tree1, measure = "auc")@y.values
-
 #Tree model 2
 pred.tree2 = predict(prune.crime2, testdatafinal, type="vector")
 prediction.tree2 = prediction(pred.tree2[,2], testdatafinal$Severity)
 rocTree2=performance(prediction.tree2, measure = "tpr", x.measure = "fpr")
 
+par(mfrow=c(1,2))
+plot(rocTree1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 1")
 plot(rocTree2, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 2")
 abline(0,1)
 
+performance(prediction.tree1, measure = "auc")@y.values
 performance(prediction.tree2, measure = "auc")@y.values
 
 #Random forests
@@ -382,7 +400,6 @@ rocrf4=performance(prediction.rf4, measure = "tpr", x.measure = "fpr")
 plot(rocrf4, lwd=3, colorkey=T, colorize=T, main="ROC Curve of RF 4")
 abline(0,1)
 performance(prediction.rf4, measure = "auc")@y.values
-
 
 #Logistic regression
 #Converting factors to numeric
@@ -456,8 +473,6 @@ logistic.crime6=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwellin
 summary(logistic.crime6)
 logistic.crime7=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+Black+Hispanic+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
 summary(logistic.crime7)
-logistic.crime8=glm(Severity~VictAge+Female+Weapon+SFamDwelling+Street+MUDwelling+Parking+Sidewalk+Vehicle+Black+Hispanic+Morning+Day+Night+Central+South, data=traindatafinal,family=binomial)
-summary(logistic.crime8)
 
 contrasts(testdatafinal$Severity)
 
@@ -477,8 +492,6 @@ logistic.newcrime3=glm(Severity~VictAge+Female+SFamDwelling+Street+MUDwelling+Si
 summary(logistic.newcrime3)
 logistic.newcrime4=glm(Severity~VictAge+Female+SFamDwelling+Street+MUDwelling+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Black+Hispanic+Morning+Day+Night+Central+South+West, data=traindatafinal,family=binomial)
 summary(logistic.newcrime4)
-logistic.newcrime5=glm(Severity~VictAge+Female+SFamDwelling+Street+MUDwelling+Sidewalk+Vehicle+OtherBusiness+Garage+Driveway+UnderParking+Black+Hispanic+Morning+Day+Night+Central+South, data=traindatafinal,family=binomial)
-summary(logistic.newcrime5)
 
 logistic.test2= predict(logistic.newcrime4, testdatafinal, type = 'response')
 pred.crimeseverity2= rep('Non-Severe',193585)
