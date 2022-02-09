@@ -4,7 +4,7 @@
 Predictive policing is becoming an important part for fair policing today. We wanted to find out if we could predict which areas would have crimes based on factors like victim's age, sex, descent, premise types etc. using decision trees and logistic regression models. The final product will be a heat map of crime hotspots in L.A. This is an academic project for ST309.
 
 ### Description
-For this project, we used the 2020 - Present dataset which can be found here: [L.A crime dataset](https://www.google.com/url?q=https://www.kaggle.com/sumaiaparveenshupti/los-angeles-crime-data-20102020&sa=D&source=docs&ust=1643133381116420&usg=AOvVaw0W60bzck7ApMThjB2a5D1W). All justifications and reasonings are listed in the code.
+For this project, we used the 2020 - Present dataset which can be found here: [L.A crime dataset](https://www.google.com/url?q=https://www.kaggle.com/sumaiaparveenshupti/los-angeles-crime-data-20102020&sa=D&source=docs&ust=1643133381116420&usg=AOvVaw0W60bzck7ApMThjB2a5D1W). 
 
 ### How to run
 - Make sure you have the packages in the first line of the code installed before running
