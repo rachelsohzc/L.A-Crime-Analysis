@@ -1,4 +1,4 @@
-# Predicting crime in Los Angeles
+# Investigating the nature of severe crimes in L.A
 
 ### Overview and motivation
 Predictive policing is becoming an important part for fair policing today. We wanted to find out if we could predict which areas would have crimes based on factors like victim's age, sex, descent, premise types etc. using decision trees and logistic regression models. The final product will be a heat map of crime hotspots in L.A. This is an academic project for ST309.
