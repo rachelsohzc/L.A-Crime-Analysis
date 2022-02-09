@@ -28,3 +28,4 @@ The results from our analysis showed that the factors Weapon, Sidewalk, Street, 
 4. [Crime forecasting](https://vciba.springeropen.com/articles/10.1186/s42492-021-00075-z#:~:text=Crime%20forecasting%20refers%20to%20the,record%20some%20unusual%20illegal%20activity.)
 5. [Crime trends in California](https://www.ppic.org/publication/crime-trends-in-california/)
 6. [ROC Curves](https://www.displayr.com/what-is-a-roc-curve-how-to-interpret-it/)
+7. [LAPD Patrol Area Maps](https://www.qsl.net/n6uru/lapd-maps.htm)
