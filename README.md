@@ -31,3 +31,6 @@ The results from our analysis showed that the factors Weapon, Sidewalk, Street, 
 5. [Crime trends in California](https://www.ppic.org/publication/crime-trends-in-california/)
 6. [ROC Curves](https://www.displayr.com/what-is-a-roc-curve-how-to-interpret-it/)
 7. [LAPD Patrol Area Maps](https://www.qsl.net/n6uru/lapd-maps.htm)
+8. [Introduction to Random Forests](https://towardsdatascience.com/random-forest-3a55c3aca46d)
+9. [LAPD UCR vs CompStat Reporting Document](https://data.lacity.org/api/views/2nrs-mtv8/files/787064ac-a2f2-4cf3-a474-45036b7da937?download=true
+&filename=UCR-COMPSTAT062618.pdf]
