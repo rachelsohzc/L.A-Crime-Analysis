@@ -7,6 +7,7 @@ Predictive policing is becoming an important part for fair policing today. We wa
 For this project, we used the 2020 - Present dataset which can be found here: [L.A crime dataset](https://www.google.com/url?q=https://www.kaggle.com/sumaiaparveenshupti/los-angeles-crime-data-20102020&sa=D&source=docs&ust=1643133381116420&usg=AOvVaw0W60bzck7ApMThjB2a5D1W). All justifications and reasonings are listed in the code.
 
 ### How to run
+Run the code in R Script or view the R Markdown file.
 
 ### Improvements
 
