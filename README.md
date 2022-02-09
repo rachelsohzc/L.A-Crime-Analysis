@@ -15,6 +15,7 @@ Run the code in R Script or view the R Markdown file.
 - Analysis limitations: Since we only used the 2020 - Present dataset, this could have affected our results. A merged dataset may have given us higher accuracy rates.
 
 ### Conclusion
+The results from our analysis showed that the factors Weapon, Sidewalk, Street, Female and Age have a strong link to severe crimes. However, it is also worth noting that these models were created based on training data. Previous predictive policing programs like PredPol have failed because the past data of crime records had race biases. These models may only further magnify these biases and lead to inaccuracy. A more accurate analysis would include a dataset that is free of bias.
 
 ### Team members
 - Rachel Soh: https://github.com/RS201918703
