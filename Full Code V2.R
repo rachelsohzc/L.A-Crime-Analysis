@@ -489,14 +489,6 @@ cat("The misclassification rate for the testing data is",(8203+58025)/(108848+82
 
 #ROC Curves for logistic regression
 #With weapons
-pred.rf1 <- predict(rf.crime1, newdata=testdatafinal)
-roc.test <- roc(test$outcome, test.predictions$votes[,2])
-auc(roc.test)
-
-#Without weapons
-
-
-#With weapons
 pred.glm1 = predict(logistic.crime7, testdatafinal, type="response")
 prediction.glm1 = prediction(pred.glm1, testdatafinal$Severity)
 rocGlm1 = performance(prediction.glm1, measure = "tpr", x.measure = "fpr")
