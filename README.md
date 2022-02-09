@@ -10,9 +10,9 @@ For this project, we used the 2020 - Present dataset which can be found here: [L
 Run the code in R Script or view the R Markdown file.
 
 ### Improvements
-- Categorical data: 
-- More modelling:
-- Analysis limitations:
+- Categorical data: Categorical data is harder to interpret at times. For instance, when we transformed the premise description column, we only took the top 10 premises and classified the remaining under the ‘OtherPremise’ category. It is possible that doing so affected our analysis.
+- More modelling: After going through our analysis, using bagging and bootstrapping may have given us more confidence in our results.
+- Analysis limitations: Since we only used the 2020 - Present dataset, this could have affected our results. A merged dataset may have given us higher accuracy rates.
 
 ### Conclusion
 
