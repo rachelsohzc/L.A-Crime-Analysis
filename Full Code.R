@@ -272,16 +272,6 @@ summary(tree1)
 plot(tree1)
 text(tree1, pretty = 0)
 
-#Plotting tree 1 next to weapon percentage
-table(traindatafinal$Severity, traindatafinal$Weapon)
-cat('Percentage of severe crimes committed with weapons:',4961/(39+4961)*100,"%")
-cat('Percentage of non-severe crimes committed with weapons:',1699/(1699+3301)*100,"%")
-
-par(mfrow=c(1,2))
-plot(tree1); text(tree1, pretty = 0)
-plot(traindatafinal$Severity,traindatafinal$Weapon, xlab="Severity",ylab="Is there a weapon",col=c("Pink","Lavender"))
-par(mfrow=c(1,1))
-
 #Tree without weapons
 tree2 = tree(formula = Severity ~.-Weapon, data = traindatafinal)
 summary(tree2)
@@ -310,6 +300,16 @@ cv.crime2$dev
 prune.crime2 = prune.misclass(tree2,best=3)
 plot(prune.crime2)
 text(prune.crime2, pretty=0)
+
+#Plotting tree 1 next to weapon percentage
+table(traindatafinal$Severity, traindatafinal$Weapon)
+cat('Percentage of severe crimes committed with weapons:',4961/(39+4961)*100,"%")
+cat('Percentage of non-severe crimes committed with weapons:',1699/(1699+3301)*100,"%")
+
+par(mfrow=c(1,2))
+plot(prune.crime1); text(tree1, pretty = 0)
+plot(traindatafinal$Severity,traindatafinal$Weapon, xlab="Severity",ylab="Is there a weapon",col=c("Pink","Lavender"))
+par(mfrow=c(1,1))
 
 #Plotting both trees side by side
 par(mfrow=c(1,2))
