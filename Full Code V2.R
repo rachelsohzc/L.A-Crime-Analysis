@@ -340,6 +340,7 @@ pred.tree2 = predict(prune.crime2, testdatafinal, type="vector")
 prediction.tree2 = prediction(pred.tree2[,2], testdatafinal$Severity)
 rocTree2=performance(prediction.tree2, measure = "tpr", x.measure = "fpr")
 
+#Plotting both curves side by side
 par(mfrow=c(1,2))
 plot(rocTree1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 1")
 plot(rocTree2, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Tree Model 2")
@@ -385,7 +386,6 @@ plot(rocrf3, lwd=3, colorkey=T, colorize=T, main="ROC Curve of RF Model 3")
 abline(0,1)
 performance(prediction.rf3, measure = "auc")@y.values
 
-
 #Without weapons
 pred.rf2 = predict(rf.crime2, testdatafinal)
 prediction.rf2 = prediction((as.numeric(pred.rf2) - 1), (as.numeric(testdatafinal$Severity)-1))
@@ -400,6 +400,12 @@ rocrf4=performance(prediction.rf4, measure = "tpr", x.measure = "fpr")
 plot(rocrf4, lwd=3, colorkey=T, colorize=T, main="ROC Curve of RF 4")
 abline(0,1)
 performance(prediction.rf4, measure = "auc")@y.values
+
+#Plotting both curves side by side
+par(mfrow=c(1,2))
+plot(rocrf1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of RF Model 1")
+plot(rocrf2, lwd=3, colorkey=T, colorize=T, main='ROC Curve of RF2')
+abline(0,1)
 
 #Logistic regression
 #Converting factors to numeric
@@ -520,3 +526,9 @@ plot(rocGlm2, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Logistic Regress
 abline(0,1)
 
 performance(prediction.glm2, measure = "auc")@y.values
+
+#Plotting both curves side by side
+par(mfrow=c(1,2))
+plot(rocGlm1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Logistic Regression with weapons")
+plot(rocGlm2, lwd=3, colorkey=T, colorize=T, main="ROC Curve of Logistic Regression without weapons")
+abline(0,1)
