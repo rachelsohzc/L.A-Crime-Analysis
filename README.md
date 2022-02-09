@@ -9,7 +9,7 @@ For this project, we used the 2020 - Present dataset which can be found here: [L
 ### How to run
 - Make sure you have the packages in the first line of the code installed before running
 - Download the dataset from here, and name the files as: "Crime_Data_from_2010_to_2019" and "Crime_Data_from_2020_to_Present" when reading the csv files
-- Run the [code](https://github.com/RS201918703/ST309-R-Project/blob/main/Full%20Code.R) in R Script or view the R Markdown file
+- Run the [code](https://github.com/RS201918703/ST309-R-Project/blob/main/Full%20Code.R) on an R Script.
 
 ### Improvements
 - Categorical data: Categorical data is harder to interpret at times. For instance, when we transformed the premise description column, we only took the top 10 premises and classified the remaining under the ‘OtherPremise’ category. It is possible that doing so affected our analysis.
