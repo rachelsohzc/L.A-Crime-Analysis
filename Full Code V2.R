@@ -353,8 +353,36 @@ cat("The misclassification rate for the testing data is",(9090+52187)/(114686+90
 
 #ROC Curves for random forests
 #With weapons
+pred.rf1 = predict(rf.newcrime1, testdatafinal)
+prediction.rf1 = prediction((as.numeric(pred.rf1) - 1), (as.numeric(testdatafinal$Severity)-1))
+rocrf1=performance(prediction.rf1, measure = "tpr", x.measure = "fpr")
+plot(rocrf1, lwd=3, colorkey=T, colorize=T, main="ROC Curve of RF Model 1")
+abline(0,1)
+performance(prediction.rf1, measure = "auc")@y.values
+
+pred.rf3 = predict(rf.newcrime1, testdatafinal)
+prediction.rf3 = prediction(as.numeric(pred.rf3), as.numeric(testdatafinal$Severity))
+rocrf3=performance(prediction.rf3, measure = "tpr", x.measure = "fpr")
+plot(rocrf3, lwd=3, colorkey=T, colorize=T, main="ROC Curve of RF Model 3")
+abline(0,1)
+performance(prediction.rf3, measure = "auc")@y.values
+
 
 #Without weapons
+pred.rf2 = predict(rf.newcrime2, testdatafinal)
+prediction.rf2 = prediction((as.numeric(pred.rf2) - 1), (as.numeric(testdatafinal$Severity)-1))
+rocrf2=performance(prediction.rf2, measure = "tpr", x.measure = "fpr")
+plot(rocrf2, lwd=3, colorkey=T, colorize=T, main='ROC Curve of RF2')
+abline(0,1)
+performance(prediction.rf2, measure = "auc")@y.values
+
+pred.rf4 = predict(rf.newcrime2, testdatafinal)
+prediction.rf4 = prediction(as.numeric(pred.rf4), as.numeric(testdatafinal$Severity))
+rocrf4=performance(prediction.rf4, measure = "tpr", x.measure = "fpr")
+plot(rocrf4, lwd=3, colorkey=T, colorize=T, main="ROC Curve of RF 4")
+abline(0,1)
+performance(prediction.rf4, measure = "auc")@y.values
+
 
 #Logistic regression
 #Converting factors to numeric
