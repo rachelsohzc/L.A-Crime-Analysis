@@ -33,3 +33,4 @@ The results from our analysis showed that the factors Weapon, Sidewalk, Street, 
 7. [LAPD Patrol Area Maps](https://www.qsl.net/n6uru/lapd-maps.htm)
 8. [Introduction to Random Forests](https://towardsdatascience.com/random-forest-3a55c3aca46d)
 9. [Random Forests Classifiers](https://www.datacamp.com/community/tutorials/random-forests-classifier-python)
+10.[Logistic regression](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3936971/)
